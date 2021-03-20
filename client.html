@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <script src="/socket.io/socket.io.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script type ="text/javascript">
+
+      var socketio = io.connect();
+      socketio.on("message_to_client",function(data) {
+         //Append an HR thematic break and the escaped HTML of the new message
+         document.getElementById("chatlog").appendChild(document.createElement("hr"));
+         document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
+      });
+
+      function sendMessage(){
+         var msg = document.getElementById("message_input").value;
+         socketio.emit("message_to_server", {message:msg});
+      }
+      
+                
+
+      </script>
+   </head>
+   <body>
+      <input type="text" id="message_input"/>
+      <button id = 'send_message'>send</button> <br>
+
+      <button id = 'create_room'>Create new room</button>
+      <input type="text" id="room_name" placeholder = 'room name'/>
+      <div id="chatlog"></div>
+
+      <script> 
+        
+        
+        function createRoom(){
+            let room_name = $('#room_name').val();
+            console.log(room_name);
+            socketio.emit('create', {room_name: room_name});
+        }
+
+
+        $("#send_message").click(function() {
+            sendMessage();
+        })
+        $("#create_room").click(function() {
+            createRoom();
+        })
+    </script>
+   </body>
+</html>
