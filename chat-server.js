@@ -27,14 +27,16 @@ const socketio = require("socket.io")(server, {
 const io = socketio.listen(server);
 
 //Server side creating a new room
-io.sockets.on('connection', function(socket) {
-    socket.on('create', function(room) {
-        console.log("New room name: " + room["room_name"]);
-        socket.join(room);
-    });
-  });
+
+    
+
 
 io.sockets.on("connection", function (socket) {
+    socket.on('create', function(room) {
+        socket.join(room);
+        io.sockets.emit("create_room", { message: room["message"] })
+        console.log("New room name: " + room["room_name"]);
+    });
     // This callback runs when a new Socket.IO connection is established.
 
     socket.on('message_to_server', function (data) {

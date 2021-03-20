@@ -22,20 +22,49 @@
       </script>
    </head>
    <body>
+    <div class="login_popup">
+        <div class="login_popup content">
+            <p>Login</p>
+            <br><br>
+            <input type='text' id='user' placeholder='Username' required />
+            <input type='password' id='pass' placeholder='Password' required /> <br>
+            <button class='login_button' id='login_button_user' name='user_type' value='user'> Login </button>
+            <div id='incorrect_password'></div>
+            <script src='ajax_login.js'> </script>
+        </div>
+    </div>  
+
+    <div id="messaging_stuff">
       <input type="text" id="message_input"/>
       <button id = 'send_message'>send</button> <br>
-
-      <button id = 'create_room'>Create new room</button>
-      <input type="text" id="room_name" placeholder = 'room name'/>
       <div id="chatlog"></div>
+    </div>
+
+
+    <div id = 'rooms_stuff'>
+        <button id = 'create_room'>Create new room</button>
+        <input type="text" id="new_room_name" placeholder = 'room name'/> <br>
+
+        <label>Room List</label><ul id = 'room_list'>
+            <!-- Populate using jQuery -->
+            <li class = 'room_name'>Room Name</li>
+        </ul>
+    </div> 
+      
+
+
+
 
       <script> 
-        
-        
+
+        $('.room_name').click(function() {
+            // Send to chat room
+        })
+
         function createRoom(){
-            let room_name = $('#room_name').val();
+            let room_name = $('#new_room_name').val();
             console.log(room_name);
-            socketio.emit('create', {room_name: room_name});
+            socketio.emit('create', {room_name: room_name, message: 'you created a new room!'});
         }
 
 
@@ -45,6 +74,15 @@
         $("#create_room").click(function() {
             createRoom();
         })
+
+        $(document).ready(function() {
+            $('#rooms_stuff').hide();
+            $('#messaging_stuff').hide();
+            
+        });
+
+
+
     </script>
    </body>
 </html>
