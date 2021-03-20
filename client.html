@@ -2,6 +2,8 @@
 <html>
    <head>
       <script src="/socket.io/socket.io.js"></script>
+      <script src = "login.js"></script>
+      <script src = 'register.js'></script>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
       <script type ="text/javascript">
 
@@ -56,6 +58,9 @@
 
 
       <script> 
+        $('#login_button_user').click(function() {
+                loginAjax();
+            })
 
         $('.room_name').click(function() {
             // Send to chat room
@@ -76,8 +81,9 @@
         })
 
         $(document).ready(function() {
-            $('#rooms_stuff').hide();
-            $('#messaging_stuff').hide();
+            // $('#rooms_stuff').hide();
+            // $('#messaging_stuff').hide();
+            //Implement when we have login/register working
             
         });
 
