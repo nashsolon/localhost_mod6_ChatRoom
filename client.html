@@ -26,15 +26,11 @@
    <body>
     <p id="login_button">Login</p>
 
-    <div class="login_popup">
-        <div class="login_popup content">
-            <p>Login</p>
-            <br><br>
-            <input type='text' id='user' placeholder='Username' required />
-            <input type='password' id='pass' placeholder='Password' required /> <br>
-            <button class='login_button' id='login_button_user' name='user_type' value='user'> Login </button>
-            <div id='incorrect_password'></div>
-            <script src='ajax_login.js'> </script>
+    <div class="enter_username">
+        <input type='text' id='user' placeholder='Username' required />
+        <button class='login_button' id='login_button_user' name='user_type' value='user'> Join Chat </button>
+        
+            
         </div>
     </div>  
 
@@ -78,6 +74,12 @@
         $('.room_name').click(function() {
             // Send to chat room
         })
+
+        socketio.on("create_room",function(data) {
+            //Append an HR thematic break and the escaped HTML of the new message
+            document.getElementById("chatlog").appendChild(document.createElement("hr"));
+            document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
+        });
 
         function createRoom(){
             let room_name = $('#new_room_name').val();
