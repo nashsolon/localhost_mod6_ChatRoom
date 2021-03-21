@@ -49,6 +49,12 @@
       <div id="chatlog"></div>
     </div>
 
+    <div id="messaging_to_room">
+        <input type="text" id="message_to_room_input" placeholder = 'send message to room'/>
+        <button id = 'send_message_to_room'>send to room</button> <br>
+        <div id="chatlog_room"></div>
+      </div>
+
 
     <div id = 'rooms_stuff'>
         <button id = 'create_room'>Create new room</button>
@@ -82,7 +88,15 @@
         
 
         $('.room_name').click(function() {
-            // Send to chat room
+            let room_name = $('.room_name').text();
+            $('#chat_header').empty();
+            $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
+            $("#chatlog").empty();
+            $('#messaging_stuff').hide();
+            $('#messaging_to_room').show();
+            $('#create_room').hide();
+            $('#new_room_name').hide();
+            
         })
 
         socketio.on("create_room",function(data) {
@@ -112,7 +126,7 @@
             $('#rooms_stuff').hide();
             $('#messaging_stuff').hide();
             $('#chat_header').hide();
-           
+            $('#messaging_to_room').hide();
             //Implement when we have login/register working
             
         });
