@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
    <head>
+        <link href="/css/chat_room.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quicksand">
       <script src="/socket.io/socket.io.js"></script>
       <script src = "login.js"></script>
       <script src = 'register.js'></script>
@@ -24,15 +26,22 @@
       </script>
    </head>
    <body>
-    <p id="login_button">Login</p>
+    <div id="login_stuff">
+        <p id="login_title">Login</p>
 
-    <div class="enter_username">
-        <input type='text' id='user' placeholder='Username' required />
-        <button class='login_button' id='login_button_user' name='user_type' value='user'> Join Chat </button>
-        
+        <div class="enter_username">
+            <input type='text' id='user' placeholder='Username' required />
+            <button id='join_button' name='user_type' value='user'> Join Chat </button>
             
+                
         </div>
     </div>  
+
+    <div id = 'chat_header'>
+        <h1 id = 'chat_title_display'>
+            Main Lobby
+        </h1>
+    </div>
 
     <div id="messaging_stuff">
       <input type="text" id="message_input"/>
@@ -64,12 +73,13 @@
                     .replace(/"/g, "&quot;")
                     .replace(/'/g, "&#039;");
             }
-        $('#login_button').click(function() {
-            $('.login_popup .content').show();
-            })
-        $('#login_button_user').click(function() {
-                loginAjax();
-            })
+        $('#join_button').click(function() {
+            $('#login_stuff').hide();
+            $('#rooms_stuff').show();
+            $('#messaging_stuff').show();
+            $('#chat_header').show();
+        })
+        
 
         $('.room_name').click(function() {
             // Send to chat room
@@ -77,13 +87,15 @@
 
         socketio.on("create_room",function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
-            document.getElementById("chatlog").appendChild(document.createElement("hr"));
-            document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
+            $("#chatlog").empty();
+            
         });
 
         function createRoom(){
             let room_name = $('#new_room_name').val();
             console.log(room_name);
+            $('#chat_header').empty();
+            $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
             $('#room_list').append("<li class='room_name' >" + escapeHtml(room_name) + "</li>");
             socketio.emit('create', {room_name: room_name, message: 'you created a new room!'});
         }
@@ -97,9 +109,10 @@
         })
 
         $(document).ready(function() {
-            //$('#rooms_stuff').hide();
-            //$('#messaging_stuff').hide();
-            //$('.login_popup .content').hide();
+            $('#rooms_stuff').hide();
+            $('#messaging_stuff').hide();
+            $('#chat_header').hide();
+           
             //Implement when we have login/register working
             
         });
