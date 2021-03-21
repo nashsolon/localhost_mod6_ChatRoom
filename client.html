@@ -24,6 +24,8 @@
       </script>
    </head>
    <body>
+    <p id="login_button">Login</p>
+
     <div class="login_popup">
         <div class="login_popup content">
             <p>Login</p>
@@ -58,6 +60,17 @@
 
 
       <script> 
+        function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+        $('#login_button').click(function() {
+            $('.login_popup .content').show();
+            })
         $('#login_button_user').click(function() {
                 loginAjax();
             })
@@ -69,6 +82,7 @@
         function createRoom(){
             let room_name = $('#new_room_name').val();
             console.log(room_name);
+            $('#room_list').append("<li class='room_name' >" + escapeHtml(room_name) + "</li>");
             socketio.emit('create', {room_name: room_name, message: 'you created a new room!'});
         }
 
@@ -81,11 +95,13 @@
         })
 
         $(document).ready(function() {
-            // $('#rooms_stuff').hide();
-            // $('#messaging_stuff').hide();
+            //$('#rooms_stuff').hide();
+            //$('#messaging_stuff').hide();
+            //$('.login_popup .content').hide();
             //Implement when we have login/register working
             
         });
+
 
 
 

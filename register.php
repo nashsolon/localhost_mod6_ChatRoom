@@ -11,8 +11,6 @@
         
     //Filtering inputs
     //Here, we are getting the stuff from ajax_register.js. This info is from the data const
-    $first_name = (string)$json_obj['first_name'];
-    $last_name = (string)$json_obj['last_name'];
     $username = (string)$json_obj['username'];
     $password = $json_obj['password'];
 
@@ -67,13 +65,13 @@
     
     
     // This code adds a new user to the database 'users'
-    $stmt = $mysqli->prepare("insert into users (username, first_name, last_name, password) values (?, ?, ?, ?)");
+    $stmt = $mysqli->prepare("insert into users (username, password) values (?, ?, ?, ?)");
     if(!$stmt){
         printf("Query Prep Failed: %s\n", $mysqli->error);
         exit;
     }
 
-    $stmt->bind_param('ssss', $username, $first_name, $last_name, $pass_hash);
+    $stmt->bind_param('ssss', $username, $pass_hash);
 
     $stmt->execute();
 
@@ -98,16 +96,13 @@
 
     $_SESSION['user_id'] = $user_id;
     $_SESSION['username'] = $username;
-    $_SESSION['token'] = bin2hex(openssl_random_pseudo_bytes(32)); 
+   
 
     // Case for when then username is not taken
         echo json_encode(array(
             "success" => true,
-            "first_name" => $first_name,
-            "last_name" => $last_name,
             "session_username" => $_SESSION['username'],
-            "pass_hash" => $pass_hash,
-            'token' => $_SESSION['token']
+            "pass_hash" => $pass_hash
         ));
 
 ?>
