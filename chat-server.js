@@ -34,8 +34,16 @@ const io = socketio.listen(server);
 
 io.sockets.on("connection", function (socket) {
     socket.on('create', function(room) {
+        console.log("The room you joined is" + room["room_name"]);
         socket.join(room);
         io.sockets.emit("create_room", { message: room["message"] })
+        console.log("New room name: " + room["room_name"]);
+    });
+
+    socket.on('message_to_server_room', function(room) {
+        console.log("The room you joined is" + room["room_name"]);
+        socket.join(room["room_name"]);
+        io.sockets.to(room["room_name"]).emit("message_to_room", { message: room["message"] })
         console.log("New room name: " + room["room_name"]);
     });
     // This callback runs when a new Socket.IO connection is established.

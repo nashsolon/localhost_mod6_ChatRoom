@@ -99,10 +99,33 @@
             
         })
 
+        function sendMessageRoom(){
+            var msg = document.getElementById("messafe_to_room_input").value;
+            socketio.emit("message_to_server_room", {room_name: room_name, message:msg});
+        }
+
+        $('.send_message_to_room').click(function() {
+            let room_name = $('.room_name').text();
+            $('#chat_header').empty();
+            $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
+            $("#chatlog").empty();
+            $('#messaging_stuff').hide();
+            $('#messaging_to_room').show();
+            $('#create_room').hide();
+            $('#new_room_name').hide();
+            
+        })
+
         socketio.on("create_room",function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             $("#chatlog").empty();
             
+        });
+
+        socketio.on("message_to_room",function(data) {
+         //Append an HR thematic break and the escaped HTML of the new message
+         document.getElementById("chatlog").appendChild(document.createElement("hr"));
+         document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
         });
 
         function createRoom(){
