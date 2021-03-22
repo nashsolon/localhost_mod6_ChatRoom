@@ -80,6 +80,7 @@
                     .replace(/"/g, "&quot;")
                     .replace(/'/g, "&#039;");
             }
+
         $('#join_button').click(function() {
             $('#login_stuff').hide();
             $('#rooms_stuff').show();
@@ -87,11 +88,13 @@
             $('#chat_header').show();
         })
         
-
-        $('.room_name').click(function() {
-            let room_name = $('.room_name').text();
+    
+        $(document).on('click', '.room_name' , function() {
+            let room_name = $(this).text();
             $('#chat_header').empty();
             $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
+            
+            
             $("#chatlog").empty();
             $('#messaging_stuff').hide();
             $('#messaging_to_room').show();
@@ -129,7 +132,7 @@
             
             let room_name = data['room_name'];
             
-            $('#room_list').append("<li class='room_name' > hi </li>");
+            $('#room_list').append("<li class='room_name' >" + room_name +  "</li>");
             
         });
 
