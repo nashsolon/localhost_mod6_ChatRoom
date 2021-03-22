@@ -60,9 +60,10 @@
         <button id = 'create_room'>Create new room</button>
         <input type="text" id="new_room_name" placeholder = 'room name'/> <br>
 
-        <label>Room List</label><ul id = 'room_list'>
+        <label>Room List</label>
+        <ul id = 'room_list'>
             <!-- Populate using jQuery -->
-            <li class = 'room_name'>Room Name</li>
+            <li class = 'room_name'>Main Lobby</li>
         </ul>
     </div> 
       
@@ -100,19 +101,14 @@
         })
 
         function sendMessageRoom(){
-            var msg = document.getElementById("messafe_to_room_input").value;
+            let room_name = $('#new_room_name').val();
+            var msg = document.getElementById("message_to_room_input").value;
+            console.log(msg);
             socketio.emit("message_to_server_room", {room_name: room_name, message:msg});
         }
 
-        $('.send_message_to_room').click(function() {
-            let room_name = $('.room_name').text();
-            $('#chat_header').empty();
-            $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
-            $("#chatlog").empty();
-            $('#messaging_stuff').hide();
-            $('#messaging_to_room').show();
-            $('#create_room').hide();
-            $('#new_room_name').hide();
+        $('#send_message_to_room').click(function() {
+            sendMessageRoom();
             
         })
 
@@ -123,9 +119,18 @@
         });
 
         socketio.on("message_to_room",function(data) {
-         //Append an HR thematic break and the escaped HTML of the new message
-         document.getElementById("chatlog").appendChild(document.createElement("hr"));
-         document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
+            //Append an HR thematic break and the escaped HTML of the new message
+            document.getElementById("chatlog_room").appendChild(document.createElement("hr"));
+            document.getElementById("chatlog_room").appendChild(document.createTextNode(data['message']));
+        });
+
+        socketio.on("add_to_roomlist",function(data) {
+            //Append an HR thematic break and the escaped HTML of the new message
+            
+            let room_name = data['room_name'];
+            
+            $('#room_list').append("<li class='room_name' > hi </li>");
+            
         });
 
         function createRoom(){
@@ -133,7 +138,8 @@
             console.log(room_name);
             $('#chat_header').empty();
             $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
-            $('#room_list').append("<li class='room_name' >" + escapeHtml(room_name) + "</li>");
+            //Do not add room name yet. Added afterwards so all users can see it
+            
             socketio.emit('create', {room_name: room_name, message: 'you created a new room!'});
         }
 
@@ -141,9 +147,20 @@
         $("#send_message").click(function() {
             sendMessage();
         })
+
         $("#create_room").click(function() {
+            let room_name = $('.room_name').text();
+            $('#chat_header').empty();
+            $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
+            $("#chatlog").empty();
+            $('#messaging_stuff').hide();
+            $('#messaging_to_room').show();
+            $('#create_room').hide();
+            $('#new_room_name').hide();
             createRoom();
         })
+
+        
 
         $(document).ready(function() {
             $('#rooms_stuff').hide();
