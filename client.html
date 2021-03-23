@@ -1,85 +1,109 @@
 <!DOCTYPE html>
 <html>
-   <head>
-        <link href="/css/chat_room.css" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quicksand">
-      <script src="/socket.io/socket.io.js"></script>
-      <script src = "login.js"></script>
-      <script src = 'register.js'></script>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-      <script type ="text/javascript">
 
-      var socketio = io.connect();
-      socketio.on("message_to_client",function(data) {
-         //Append an HR thematic break and the escaped HTML of the new message
-         document.getElementById("chatlog").appendChild(document.createElement("hr"));
-         document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
-      });
+<head>
+    <link href="chat_room.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quicksand">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        var socketio = io.connect();
+        socketio.on("message_to_client", function(data) {
+            // Append an HR thematic break and the escaped HTML of the new message
+            document.getElementById("chatlog").appendChild(document.createElement("hr"));
+            document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
+        });
 
-      function sendMessage(){
-         var msg = document.getElementById("message_input").value;
-         socketio.emit("message_to_server", {message:msg});
-      }
-      
-                
+        function sendMessage() {
+            var msg = document.getElementById("message_input").value;
+            socketio.emit("message_to_server", {
+                message: msg
+            });
+        }
+    </script>
+    <!-- <style>
+        body {
+            background-color: blue;
+        }
+    </style> -->
 
-      </script>
-   </head>
-   <body>
-    <div id="login_stuff">
+</head>
+
+<body>
+    <!-- <div id="login_stuff">
         <p id="login_title">Login</p>
 
         <div class="enter_username">
             <input type='text' id='user' placeholder='Username' required />
             <button id='join_button' name='user_type' value='user'> Join Chat </button>
-            
-                
         </div>
-    </div>  
+    </div>
 
-    <div id = 'chat_header'>
-        <h1 id = 'chat_title_display'>
+    <div id='chat_header'>
+        <h1 id='chat_title_display'>
             Main Lobby
         </h1>
     </div>
 
     <div id="messaging_stuff">
-      <input type="text" id="message_input"/>
-      <button id = 'send_message'>send</button> <br>
-      <div id="chatlog"></div>
+        <input type="text" id="message_input" />
+        <button id='send_message'>send</button> <br>
+        <div id="chatlog"></div>
     </div>
 
     <div id="messaging_to_room">
-        <input type="text" id="message_to_room_input" placeholder = 'send message to room'/>
-        <button id = 'send_message_to_room'>send to room</button> <br>
+        <input type="text" id="message_to_room_input" placeholder='send message to room' />
+        <button id='send_message_to_room'>send to room</button> <br>
         <div id="chatlog_room"></div>
-      </div>
+    </div>
 
 
-    <div id = 'rooms_stuff'>
-        <button id = 'create_room'>Create new room</button>
-        <input type="text" id="new_room_name" placeholder = 'room name'/> <br>
+    <div id='rooms_stuff'>
+        <button id='create_room'>Create new room</button>
+        <input type="text" id="new_room_name" placeholder='room name' /> <br>
 
         <label>Room List</label>
-        <ul id = 'room_list'>
-            <!-- Populate using jQuery -->
-            <li class = 'room_name'>Main Lobby</li>
+        <ul id='room_list'>
+            Populate using jQuery -->
+    <!-- <li class='room_name'>Main Lobby</li>
         </ul>
-    </div> 
-      
+    </div> -->
+    <div class="left-panel">
+        <div class="panel-header">
+            <p>Rooms</p>
+        </div>
+    </div>
+    <div class="right-panel">
+        <div class="panel-header">
+            <p id="curr_room">Main Room</p>
+        </div>
+
+        <div class="chat">
+            <p><strong id="me">Sasha:</strong> What's up?</p>
+            <p><strong>Max:</strong> Not much</p>
+            <p><strong>Nash:</strong> So much stuff </p>
+            <p id="typing"><em>Pranay is typing...<em></p>
+        </div>
+  
+        <div class="chat-box">
+          <input id="chat_text" type="text" placeholder="type anything" />
+          
+        </div>
+        <img id="send_btn" src="send_icon.png" alt="send"/>
+    </div>
 
 
 
 
-      <script> 
+    <script>
         function escapeHtml(unsafe) {
-                return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
 
         $('#join_button').click(function() {
             $('#login_stuff').hide();
@@ -87,63 +111,69 @@
             $('#messaging_stuff').show();
             $('#chat_header').show();
         })
-        
-    
-        $(document).on('click', '.room_name' , function() {
+
+
+        $(document).on('click', '.room_name', function() {
             let room_name = $(this).text();
             $('#chat_header').empty();
             $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
-            
-            
+
+
             $("#chatlog").empty();
             $('#messaging_stuff').hide();
             $('#messaging_to_room').show();
             $('#create_room').hide();
             $('#new_room_name').hide();
-            
+
         })
 
-        function sendMessageRoom(){
+        function sendMessageRoom() {
             let room_name = $('#new_room_name').val();
             var msg = document.getElementById("message_to_room_input").value;
             console.log(msg);
-            socketio.emit("message_to_server_room", {room_name: room_name, message:msg});
+            socketio.emit("message_to_server_room", {
+                room_name: room_name,
+                message: msg
+            });
         }
 
         $('#send_message_to_room').click(function() {
             sendMessageRoom();
-            
+
         })
 
-        socketio.on("create_room",function(data) {
+        socketio.on("create_room", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             $("#chatlog").empty();
-            
+
         });
 
-        socketio.on("message_to_room",function(data) {
+        socketio.on("message_to_room", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             document.getElementById("chatlog_room").appendChild(document.createElement("hr"));
             document.getElementById("chatlog_room").appendChild(document.createTextNode(data['message']));
         });
 
-        socketio.on("add_to_roomlist",function(data) {
+        socketio.on("add_to_roomlist", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
-            
+
             let room_name = data['room_name'];
-            
-            $('#room_list').append("<li class='room_name' >" + room_name +  "</li>");
-            
+
+            $('#room_list').append("<li class='room_name' >" + room_name + "</li>");
+
         });
 
-        function createRoom(){
+        function createRoom() {
             let room_name = $('#new_room_name').val();
             console.log(room_name);
             $('#chat_header').empty();
             $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
             //Do not add room name yet. Added afterwards so all users can see it
-            
-            socketio.emit('create', {room_name: room_name, message: 'you created a new room!'});
+
+            socketio.emit('create', {
+                room_name: room_name,
+                message: 'you created a new room!'
+            });
         }
 
 
@@ -163,7 +193,7 @@
             createRoom();
         })
 
-        
+
 
         $(document).ready(function() {
             $('#rooms_stuff').hide();
@@ -171,12 +201,9 @@
             $('#chat_header').hide();
             $('#messaging_to_room').hide();
             //Implement when we have login/register working
-            
+
         });
-
-
-
-
     </script>
-   </body>
+</body>
+
 </html>
