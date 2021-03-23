@@ -30,9 +30,20 @@ const io = socketio.listen(server);
 //Server side creating a new room
 
     
-
+let users = [];
 
 io.sockets.on("connection", function (socket) {
+    
+    socket.on('join_server', function(username) {
+        
+        const user = { 
+            username,
+            id: socket.id
+        };
+        users.push(user);
+        io.sockets.emit("new_user", { users: users });
+    });
+
     socket.on('create', function(room) {
         
         socket.join(room["room_name"]);

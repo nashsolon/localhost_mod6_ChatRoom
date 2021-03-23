@@ -43,29 +43,79 @@
         </h1>
     </div>
 
+    <div id="chatlog"></div>
     <div id="messaging_stuff">
       <input type="text" id="message_input"/>
       <button id = 'send_message'>send</button> <br>
-      <div id="chatlog"></div>
+      
     </div>
 
+    <div id="chatlog_room"></div>
     <div id="messaging_to_room">
         <input type="text" id="message_to_room_input" placeholder = 'send message to room'/>
         <button id = 'send_message_to_room'>send to room</button> <br>
-        <div id="chatlog_room"></div>
-      </div>
+        
+    </div>
 
 
     <div id = 'rooms_stuff'>
-        <button id = 'create_room'>Create new room</button>
-        <input type="text" id="new_room_name" placeholder = 'room name'/> <br>
-
         <label>Room List</label>
         <ul id = 'room_list'>
             <!-- Populate using jQuery -->
             <li class = 'room_name'>Main Lobby</li>
         </ul>
+
+        <label>User List</label>
+        <ul id = 'user_list'>
+            <!-- Populate using jQuery -->
+            
+        </ul>
+        <button id = 'create_room'>Create new room</button>
+        <input type="text" id="new_room_name" placeholder = 'room name'/> <br>
     </div> 
+
+
+
+    <style>
+        body {
+            background-color: #67a5eb;
+            /* color: white; */
+            font-family: 'Quicksand'
+        }
+        h1 {
+            background-color: #1357a5;
+            /* color: white; */
+            font-family: 'Quicksand'
+        }
+        #rooms_stuff{
+            float: left;
+        }
+        #chatlog,
+        #chatlog_room{
+            float: right;
+        }
+        .left {
+            width: 25%;
+        }
+
+        .right {
+            width: 75%;
+        }
+        
+        #messaging_stuff,
+        #messagin_to_room {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: rgb(160, 166, 255);
+            color: white;
+            text-align: center;
+        }
+        
+        
+
+    </style>
       
 
 
@@ -82,11 +132,23 @@
             }
 
         $('#join_button').click(function() {
+            const username = $('#user').val();
             $('#login_stuff').hide();
             $('#rooms_stuff').show();
             $('#messaging_stuff').show();
             $('#chat_header').show();
+            socketio.emit("join_server", {username: username});
+
+
         })
+
+        socketio.on("new_user", function(users){
+            user_array = users['users'];
+            for (user in user_array){
+                $('#user_list').append("<li class='user_name' >" + user +  "</li>");
+            }
+            
+        });
         
     
         $(document).on('click', '.room_name' , function() {
