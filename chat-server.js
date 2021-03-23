@@ -38,7 +38,17 @@ io.sockets.on("connection", function (socket) {
         socket.join(room["room_name"]);
         
         console.log("The room you joined is: " + room["room_name"]);
-        io.sockets.emit("add_to_roomlist", { room_name: room["room_name"] })
+        io.sockets.emit("add_to_roomlist", { room_name: room["room_name"] });
+    });
+
+    socket.on('switch_room', function (join_data) {
+        // This callback runs when the server receives a new message from the client.
+
+        console.log("message: " + join_data["message"]); // log it to the Node.JS output
+        socket.join(join_data["room_name"]);
+        
+        console.log("The room you joined is: " + join_data["room_name"]);
+ 
     });
 
     socket.on('message_to_server_room', function(room) {

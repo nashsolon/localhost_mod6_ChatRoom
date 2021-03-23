@@ -100,8 +100,18 @@
             $('#messaging_to_room').show();
             $('#create_room').hide();
             $('#new_room_name').hide();
+            switchRoom(room_name);
+
+
             
         })
+
+        function switchRoom(room_name){
+            
+            console.log("You want to swtich to: " + room_name);
+            //Do not add room name yet. Added afterwards so all users can see it
+            socketio.emit('switch_room', {room_name: room_name, message: 'you switched rooms!'});
+        }
 
         function sendMessageRoom(){
             let room_name = $('#new_room_name').val();
@@ -129,9 +139,7 @@
 
         socketio.on("add_to_roomlist",function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
-            
             let room_name = data['room_name'];
-            
             $('#room_list').append("<li class='room_name' >" + room_name +  "</li>");
             
         });
