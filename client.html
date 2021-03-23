@@ -8,18 +8,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript">
         var socketio = io.connect();
-        socketio.on("message_to_client", function(data) {
-            // Append an HR thematic break and the escaped HTML of the new message
-            document.getElementById("chatlog").appendChild(document.createElement("hr"));
-            document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
-        });
-
-        function sendMessage() {
-            var msg = document.getElementById("message_input").value;
-            socketio.emit("message_to_server", {
-                message: msg
-            });
-        }
     </script>
     <style>
          :root {
@@ -220,17 +208,17 @@
         </div>
 
         <div class="chat">
-            <p><strong id="me">Sasha:</strong> What's up?</p>
+            <!-- <p><strong id="me">Sasha:</strong> What's up?</p>
             <p><strong>Max:</strong> Not much</p>
-            <p><strong>Nash:</strong> So much stuff </p>
-            <p id="typing"><em>Pranay is typing...<em></p>
+            <p><strong>Nash:</strong> So much stuff </p> -->
+            <!-- <p id="typing"><em>Pranay is typing...<em></p> -->
         </div>
-  
+
         <div class="chat-box">
-          <input id="chat_text" type="text" placeholder="type anything" />
-          
+            <input id="chat_text" type="text" placeholder="type anything" />
+
         </div>
-        <img id="send_btn" src="send_icon.png" alt="send"/>
+        <img id="send_btn" src="send_icon.png" alt="send" />
     </div>
 
 
@@ -246,64 +234,73 @@
                 .replace(/'/g, "&#039;");
         }
 
-        $('#join_button').click(function() {
-            const username = $('#user').val();
-            $('#login_stuff').hide();
-            $('#rooms_stuff').show();
-            $('#messaging_stuff').show();
-            $('#chat_header').show();
-            socketio.emit("join_server", {username: username});
+        // $('#join_button').click(function() {
+        //     const username = $('#user').val();
+        //     $('#login_stuff').hide();
+        //     $('#rooms_stuff').show();
+        //     $('#messaging_stuff').show();
+        //     $('#chat_header').show();
+        //     socketio.emit("join_server", {username: username});
 
 
-        })
+        // })
 
-        socketio.on("new_user", function(users){
+        socketio.on("new_user", function(users) {
             user_array = users['users'];
-            for (user in user_array){
-                $('#user_list').append("<li class='user_name' >" + user +  "</li>");
+            for (user in user_array) {
+                // $('#user_list').append("<li class='user_name' >" + user +  "</li>");
             }
-            
+
         });
-        
-    
-        $(document).on('click', '.room_name' , function() {
+
+
+        $("document").on('click', '.room_name', function() {
             let room_name = $(this).text();
-            $('#chat_header').empty();
-            $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
+            $('#curr_room').text(room_name);
+            // $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
 
 
-            $("#chatlog").empty();
-            $('#messaging_stuff').hide();
-            $('#messaging_to_room').show();
-            $('#create_room').hide();
-            $('#new_room_name').hide();
+            $(".chat").empty();
+            // $('#messaging_stuff').hide();
+            // $('#messaging_to_room').show();
+            // $('#create_room').hide();
+            // $('#new_room_name').hide();
             switchRoom(room_name);
 
 
-            
+
         })
 
-        function switchRoom(room_name){
-            
-            console.log("You want to swtich to: " + room_name);
-            //Do not add room name yet. Added afterwards so all users can see it
-            socketio.emit('switch_room', {room_name: room_name, message: 'you switched rooms!'});
-        }
+        function switchRoom(room_name) {
 
-        function sendMessageRoom(){
-            let room_name = $('#new_room_name').val();
-            var msg = document.getElementById("message_to_room_input").value;
-            console.log(msg);
-            socketio.emit("message_to_server_room", {
+            console.log("You want to switch to: " + room_name);
+            //Do not add room name yet. Added afterwards so all users can see it
+            socketio.emit('switch_room', {
                 room_name: room_name,
-                message: msg
+                message: 'you switched rooms!'
             });
         }
 
-        $('#send_message_to_room').click(function() {
-            sendMessageRoom();
+        // sends message to specific room
+        function sendMessage() {
+            let room_name = $('#curr_room').text();
+            let msg = $("#chat_text").val();
+            console.log(msg);
+            socketio.emit("message_to_server", {
+                room_name: room_name,
+                message: msg,
+                user: "Sasha"
+            });
+        }
 
+        $('#send_btn').click(function() {
+            sendMessage();
         })
+        $("#chat_text").keyup(function(event) {
+            if (event.keyCode === 13) {
+                $("#send_btn").click();
+            }
+        });
 
         socketio.on("create_room", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
@@ -311,24 +308,24 @@
 
         });
 
-        socketio.on("message_to_room", function(data) {
+        socketio.on("message_to_client", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
-            document.getElementById("chatlog_room").appendChild(document.createElement("hr"));
-            document.getElementById("chatlog_room").appendChild(document.createTextNode(data['message']));
+            $(".chat").append("<p><strong>" + data.user + ":</strong> " + data.message + "</p>");
+            // document.getElementById("chatlog_room").appendChild(document.createTextNode(data['message']));
         });
 
         socketio.on("add_to_roomlist", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             let room_name = data['room_name'];
-            $('#room_list').append("<li class='room_name' >" + room_name +  "</li>");
-            
+            $('#room_list').append("<li class='room_name' >" + room_name + "</li>");
+
         });
 
         function createRoom() {
             let room_name = $('#new_room_name').val();
             console.log(room_name);
-            $('#chat_header').empty();
-            $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
+            // $('#chat_header').empty();
+            // $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
             //Do not add room name yet. Added afterwards so all users can see it
 
             socketio.emit('create', {
@@ -338,29 +335,29 @@
         }
 
 
-        $("#send_message").click(function() {
-            sendMessage();
-        })
+        // $("#send_message").click(function() {
+        //     sendMessage();
+        // })
 
-        $("#create_room").click(function() {
-            let room_name = $('.room_name').text();
-            $('#chat_header').empty();
-            $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
-            $("#chatlog").empty();
-            $('#messaging_stuff').hide();
-            $('#messaging_to_room').show();
-            $('#create_room').hide();
-            $('#new_room_name').hide();
-            createRoom();
-        })
+        // $("#create_room").click(function() {
+        //     let room_name = $('.room_name').text();
+        //     $('#chat_header').empty();
+        //     $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
+        //     $("#chatlog").empty();
+        //     $('#messaging_stuff').hide();
+        //     $('#messaging_to_room').show();
+        //     $('#create_room').hide();
+        //     $('#new_room_name').hide();
+        //     createRoom();
+        // })
 
 
 
         $(document).ready(function() {
-            $('#rooms_stuff').hide();
-            $('#messaging_stuff').hide();
-            $('#chat_header').hide();
-            $('#messaging_to_room').hide();
+            // $('#rooms_stuff').hide();
+            // $('#messaging_stuff').hide();
+            // $('#chat_header').hide();
+            // $('#messaging_to_room').hide();
             //Implement when we have login/register working
 
         });
