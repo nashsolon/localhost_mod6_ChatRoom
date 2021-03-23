@@ -13,12 +13,19 @@
          :root {
             /* Panels */
             --left-panel-bg: #0e1525;
-            --left-panel-hd: #0d101e;
+            --right-panel-hd: #0d101e;
             --right-panel-bg: #1d2333;
             /* Others */
-            --chat-box-bg: rgb(117, 117, 117);
+            --chat-box-bg: #2e3444;
             /* Text */
             --font-color: white;
+            --other-users-color: rgb(125, 158, 228);
+            --this-user-color: lightgreen;
+            --send-btn-color: lightblue;
+        }
+        
+        html {
+            scroll-behavior: smooth;
         }
         
         body {
@@ -62,7 +69,7 @@
             font-weight: bold;
             height: 75px;
             width: 100%;
-            background-color: var(--left-panel-hd);
+            background-color: var(--right-panel-hd);
             top: 0px;
             position: absolute;
         }
@@ -93,14 +100,15 @@
         
         .chat p {
             font-size: 15pt;
+            margin: 10px;
         }
         
         .chat strong {
-            color: rgb(125, 158, 228);
+            color: var(--other-users-color);
         }
         
         .chat #me {
-            color: lightgreen;
+            color: var(--this-user-color);
         }
         
         .chat em {
@@ -131,6 +139,7 @@
             position: relative;
             bottom: 0px;
             color: white;
+            padding-left: 20px;
         }
         
         input[type="text"]:focus {
@@ -144,17 +153,21 @@
             width: 30px;
             height: 30px;
             z-index: 1;
-            bottom: 5px;
+            bottom: -10px;
             right: 10px;
-            opacity: .2;
+            opacity: 1;
+            color: var(--other-users-color);
+            filter: brightness(1);
+            /* margin: -9px; */
         }
         
         #send_btn:hover {
-            opacity: .4;
+            filter: brightness(0.8);
+            cursor: pointer;
         }
         
         #send_btn:focus {
-            opacity: .6;
+            filter: brightness(0.6);
         }
         /* .room_list {
             text-align: left;
@@ -232,10 +245,12 @@
         </div>
 
         <div class="chat-box">
-            <input id="chat_text" type="text" placeholder="type anything" />
+            <input id="chat_text" type="text" placeholder="Tell me your secrets..." />
 
         </div>
-        <img id="send_btn" src="send_icon.png" alt="send" />
+        <p id="send_btn"> &#x279C; </p>
+
+        <!-- <img id="send_btn" src="send_icon.png" alt="send" /> -->
     </div>
 
 
@@ -311,8 +326,14 @@
         }
 
         $('#send_btn').click(function() {
-            sendMessage();
+            if ($("#chat_text").val() != "")
+                sendMessage();
             $("#chat_text").val("");
+            let sh = $(".chat")[0].scrollHeight;
+            // alert(sh);
+            $(".chat").stop(true, false).animate({
+                scrollTop: sh
+            }, 500);
         })
         $("#chat_text").keyup(function(event) {
             if (event.keyCode === 13) {
