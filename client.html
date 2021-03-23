@@ -21,11 +21,147 @@
             });
         }
     </script>
-    <!-- <style>
-        body {
-            background-color: blue;
+    <style>
+         :root {
+            /* Panels */
+            --left-panel-bg: #0e1525;
+            --left-panel-hd: #0d101e;
+            --right-panel-bg: #1d2333;
+            /* Others */
+            --chat-box-bg: rgb(117, 117, 117);
+            /* Text */
+            --font-color: white;
         }
-    </style> -->
+        
+        body {
+            font-family: 'Quicksand';
+            text-align: center;
+            color: var(--font-color);
+            font-size: 20pt;
+            /* filter: blur(0px); */
+        }
+        
+        .left-panel {
+            box-sizing: border-box;
+            height: 100%;
+            width: 25%;
+            background-color: var(--left-panel-bg);
+            display: block;
+            margin: 0px;
+            position: fixed;
+            top: 0px;
+            left: 0px;
+        }
+        
+        .left-panel .panel-header {
+            background-color: var(--left-panel-bg);
+        }
+        
+        .right-panel {
+            box-sizing: border-box;
+            height: 100%;
+            width: 75%;
+            background-color: var(--right-panel-bg);
+            display: block;
+            margin: 0px;
+            position: fixed;
+            top: 0px;
+            right: 0px;
+        }
+        
+        .panel-header {
+            box-sizing: border-box;
+            font-weight: bold;
+            height: 75px;
+            width: 100%;
+            background-color: var(--left-panel-hd);
+            top: 0px;
+            position: absolute;
+        }
+        
+        .panel-header p {
+            margin-top: 21px;
+        }
+        
+        .chat {
+            box-sizing: border-box;
+            top: 75px;
+            width: 100%;
+            height: 100px;
+            left: 0px;
+            right: 0px;
+            /* bottom: 0px; */
+            position: absolute;
+            text-align: left;
+            padding: 20px;
+        }
+        
+        .chat p {
+            font-size: 15pt;
+        }
+        
+        .chat strong {
+            color: rgb(125, 158, 228);
+        }
+        
+        .chat #me {
+            color: lightgreen;
+        }
+        
+        .chat em {
+            color: grey;
+        }
+        
+        .chat-box {
+            box-sizing: border-box;
+            width: 100%;
+            height: 60px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            position: absolute;
+            /* background-color: orange; */
+            /* padding: 2 */
+        }
+        
+        input[type="text"] {
+            box-sizing: border-box;
+            margin: 0px;
+            width: 100%;
+            border-style: none;
+            font-family: 'Quicksand';
+            background-color: var(--chat-box-bg);
+            font-size: 15pt;
+            height: 100%;
+            position: relative;
+            bottom: 0px;
+            color: white;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            /* height: 2px; */
+        }
+        
+        #send_btn {
+            box-sizing: border-box;
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            z-index: 1;
+            bottom: 5px;
+            right: 10px;
+            opacity: .2;
+        }
+        
+        #send_btn:hover {
+            opacity: .4;
+        }
+        
+        #send_btn:focus {
+            opacity: .6;
+        }
+    </style>
 
 </head>
 
@@ -45,12 +181,14 @@
         </h1>
     </div>
 
+    <div id="chatlog"></div>
     <div id="messaging_stuff">
         <input type="text" id="message_input" />
         <button id='send_message'>send</button> <br>
         <div id="chatlog"></div>
     </div>
 
+    <div id="chatlog_room"></div>
     <div id="messaging_to_room">
         <input type="text" id="message_to_room_input" placeholder='send message to room' />
         <button id='send_message_to_room'>send to room</button> <br>
@@ -71,6 +209,9 @@
     <div class="left-panel">
         <div class="panel-header">
             <p>Rooms</p>
+            <ul id='room_list'>
+                <li class='room_name'>Main Room</li>
+            </ul>
         </div>
     </div>
     <div class="right-panel">
@@ -106,14 +247,26 @@
         }
 
         $('#join_button').click(function() {
+            const username = $('#user').val();
             $('#login_stuff').hide();
             $('#rooms_stuff').show();
             $('#messaging_stuff').show();
             $('#chat_header').show();
+            socketio.emit("join_server", {username: username});
+
+
         })
 
-
-        $(document).on('click', '.room_name', function() {
+        socketio.on("new_user", function(users){
+            user_array = users['users'];
+            for (user in user_array){
+                $('#user_list').append("<li class='user_name' >" + user +  "</li>");
+            }
+            
+        });
+        
+    
+        $(document).on('click', '.room_name' , function() {
             let room_name = $(this).text();
             $('#chat_header').empty();
             $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
@@ -124,10 +277,20 @@
             $('#messaging_to_room').show();
             $('#create_room').hide();
             $('#new_room_name').hide();
+            switchRoom(room_name);
 
+
+            
         })
 
-        function sendMessageRoom() {
+        function switchRoom(room_name){
+            
+            console.log("You want to swtich to: " + room_name);
+            //Do not add room name yet. Added afterwards so all users can see it
+            socketio.emit('switch_room', {room_name: room_name, message: 'you switched rooms!'});
+        }
+
+        function sendMessageRoom(){
             let room_name = $('#new_room_name').val();
             var msg = document.getElementById("message_to_room_input").value;
             console.log(msg);
@@ -156,11 +319,9 @@
 
         socketio.on("add_to_roomlist", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
-
             let room_name = data['room_name'];
-
-            $('#room_list').append("<li class='room_name' >" + room_name + "</li>");
-
+            $('#room_list').append("<li class='room_name' >" + room_name +  "</li>");
+            
         });
 
         function createRoom() {
