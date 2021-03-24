@@ -101,7 +101,8 @@ io.sockets.on("connection", function(socket) {
     })
 
     socket.on('create', function(room) {
-        socket.join(room);
+        socket.join(room.room_name);
+        
         io.sockets.emit("create_room", { message: room["message"] });
         console.log("New room name: " + room["room_name"]);
     });
@@ -113,7 +114,8 @@ io.sockets.on("connection", function(socket) {
 
         // console.log("message: " + data["message"]); // log it to the Node.JS output
         // console.log(data.user);
-        io.sockets.emit("message_to_client", data); // broadcast the message to other users
+        room = data.room_name;
+        io.to(data.room_name).emit("message_to_client", data); // broadcast the message to other users
     });
 });
 // io.sockets.on("disconnect", function() {
