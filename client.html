@@ -47,7 +47,7 @@
             top: 0px;
             right: -500px;
         }
-
+        
         #create_popup {
             box-sizing: border-box;
             height: 100%;
@@ -266,6 +266,7 @@
             top: -2px;
             left: 25px;
         }
+        
         #close_creation {
             box-sizing: border-box;
             color: white;
@@ -274,11 +275,13 @@
             top: -2px;
             right: 8px;
         }
-        #add_room{
+        
+        #add_room {
             color: white;
             position: absolute;
             left: 20px;
         }
+        
         #new_room_name {
             height: 70px;
             margin-top: 100px;
@@ -341,16 +344,17 @@
     <div class="left-panel">
         <div class="panel-header">
             <!-- HTML for creating room -->
-            <p class = 'btn' id = 'add_room'> &plus; </p>
+            <p class='btn' id='add_room'> &plus; </p>
 
-            <div id = 'create_popup'> 
+            <div id='create_popup'>
                 <div class="panel-header">
                     <p>Create a Room</p>
-                    <p class="btn" id="close_creation"> < </p>
+                    <p class="btn" id="close_creation">
+                        < </p>
                 </div>
-                
+
                 <input type="text" id="new_room_name" placeholder='room name' /> <br>
-                <p class = 'btn' id='create_room'>Create new room</p>
+                <p class='btn' id='create_room'>Create new room</p>
             </div>
 
             <p>Rooms</p>
@@ -590,7 +594,7 @@
         //     sendMessage();
         // })
 
-        $("#create_room").click(function(){
+        $("#create_room").click(function() {
             let room_name = $('#new_room_name').val();
             console.log(room_name)
             $('#curr_room').html(room_name);
