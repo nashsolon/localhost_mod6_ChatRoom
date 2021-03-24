@@ -68,6 +68,21 @@ io.sockets.on("connection", function(socket) {
 
     });
 
+    typing = "";
+
+    socket.on('typing', function(username) {
+        if (typing == "") {
+            typing = username;
+            socket.broadcast.emit('typing', username);
+        }
+    });
+
+    socket.on('typing_off', function(username) {
+        if (username == typing) {
+            typing = "";
+            socket.broadcast.emit('typing_off');
+        }
+    })
 
     socket.on('create', function(room) {
         socket.join(room);

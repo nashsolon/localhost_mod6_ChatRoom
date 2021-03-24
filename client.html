@@ -323,10 +323,10 @@
         </div>
 
         <div class="chat">
-            <!-- <p><strong id="me">Sasha:</strong> What's up?</p>
-            <p><strong>Max:</strong> Not much</p>
-            <p><strong>Nash:</strong> So much stuff </p> -->
-            <!-- <p id="typing"><em>Pranay is typing...<em></p> -->
+            <div class="msgs">
+
+            </div>
+            <p id="typing"></p>
         </div>
 
         <div class="chat-box">
@@ -365,18 +365,6 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
-
-        // $('#join_button').click(function() {
-        //     const username = $('#user').val();
-        //     $('#login_stuff').hide();
-        //     $('#rooms_stuff').show();
-        //     $('#messaging_stuff').show();
-        //     $('#chat_header').show();
-        //     socketio.emit("join_server", {username: username});
-
-
-        // })
-
         socketio.on("new_user", function(users) {
             user_array = users['users'];
             for (user in user_array) {
@@ -389,14 +377,8 @@
         $("document").on('click', '.room_name', function() {
             let room_name = $(this).text();
             $('#curr_room').text(room_name);
-            // $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
-
 
             $(".chat").empty();
-            // $('#messaging_stuff').hide();
-            // $('#messaging_to_room').show();
-            // $('#create_room').hide();
-            // $('#new_room_name').hide();
             switchRoom(room_name);
         })
 
@@ -423,6 +405,7 @@
         }
 
         $('#send_btn').click(function() {
+            socketio.emit("typing_off", username);
             if ($("#chat_text").val() != "")
                 sendMessage();
             $("#chat_text").val("");
@@ -435,8 +418,14 @@
         $("#chat_text").keyup(function(event) {
             if (event.keyCode === 13) {
                 $("#send_btn").click();
+            } else if ($(this).val().length > 0) {
+                console.log("typing...");
+                socketio.emit("typing", username);
+            } else if ($(this).val().length == 0) {
+                socketio.emit("typing_off", username);
             }
         });
+
 
         // LOGIN
         $("#login_btn").click(function() {
@@ -483,13 +472,23 @@
             }, 300)
         });
 
+        socketio.on("typing", function(typing_user) {
+            console.log(typing_user + " is typing...");
+            $("#typing").html("<em>" + typing_user + " is typing...</em>");
+        });
+
+        socketio.on("typing_off", function() {
+            // console.log()
+            $("#typing").html("");
+        });
+
         socketio.on("message_to_client", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             console.log("Received message");
             if (data.user == username)
-                $(".chat").append("<p><strong class='me'>" + data.user + ":</strong> " + data.message + "</p>");
+                $(".chat .msgs").append("<p><strong class='me'>" + data.user + ":</strong> " + data.message + "</p>");
             else
-                $(".chat").append("<p><strong>" + data.user + ":</strong> " + data.message + "</p>");
+                $(".chat .msgs").append("<p><strong>" + data.user + ":</strong> " + data.message + "</p>");
             // document.getElementById("chatlog_room").appendChild(document.createTextNode(data['message']));
         });
 
@@ -513,11 +512,10 @@
             $("#user_list").empty();
             let these_users = data[$('#curr_room').text()]
             console.log(username);
+            $("#user_list").append("<li class='user_name me'>" + username + "</li>");
             for (let i = 0; i < these_users.length; i++) {
                 let this_user = these_users[i];
-                if (this_user == username)
-                    $("#user_list").append("<li class='user_name me'>" + this_user + "</li>");
-                else
+                if (this_user != username)
                     $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
             }
         });
@@ -551,8 +549,6 @@
         //     $('#new_room_name').hide();
         //     createRoom();
         // })
-
-
 
         $(document).ready(function() {
             // $('#rooms_stuff').hide();
