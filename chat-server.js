@@ -46,6 +46,10 @@ io.sockets.on("connection", function(socket) {
         io.sockets.emit("new_user", users);
     });
 
+    socket.on('get_users', function() {
+        io.sockets.emit("get_users", users);
+    });
+
     socket.on('create', function(room) {
 
         socket.join(room["room_name"]);

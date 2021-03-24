@@ -418,14 +418,6 @@
             });
         }
 
-        function loginUser(this_user) {
-            username = this_user;
-            socketio.emit("join_server", {
-                user: username,
-                room: $('#curr_room').text()
-            })
-        }
-
         $('#send_btn').click(function() {
             if ($("#chat_text").val() != "")
                 sendMessage();
@@ -442,17 +434,38 @@
             }
         });
 
+        // LOGIN
         $("#login_btn").click(function() {
-            if ($("#user").val() != "")
-                loginUser($("#user").val());
-            $(".login").hide();
-            $("#user").val("");
+            socketio.emit("get_users");
+            socketio.on("get_users", function(users) {
+                console.log(users);
+                let login = !users[$('#curr_room').text()].includes($("#user").val());
+                login = $("#user").val() == "" ? false : login;
+                console.log(login);
+                if (login) {
+                    console.log("Login " + $("#user").val());
+                    socketio.emit("join_server", {
+                        user: $("#user").val(),
+                        room: $('#curr_room').text()
+                    });
+                    $(".login").hide();
+                    $(".username").attr('id', )
+                    loginUser($("#user").val());
+                    $("#user").val("");
+                } else {
+                    console.log("Cannot login " + $("#user").val());
+                }
+            });
         })
         $("#user").keyup(function(event) {
             if (event.keyCode === 13) {
                 $("#login_btn").click();
             }
         });
+
+        function loginUser(user_name) {
+            username = user_name;
+        }
 
         $("#user_menu").click(function() {
             $(".room-users").animate({
@@ -490,9 +503,12 @@
         });
 
         socketio.on("new_user", function(data) {
-            // console.log(data);
+            console.log(data);
+            if (username == "")
+                return;
             $("#user_list").empty();
             let these_users = data[$('#curr_room').text()]
+            console.log(username);
             for (let i = 0; i < these_users.length; i++) {
                 let this_user = these_users[i];
                 if (this_user == username)
