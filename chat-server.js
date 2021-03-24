@@ -21,7 +21,7 @@ server.listen(port);
 
 // Import Socket.IO and pass our HTTP server object to it.
 const socketio = require("socket.io")(server, {
-    
+
 });
 
 // Attach our Socket.IO server to our HTTP server to listen
@@ -54,7 +54,9 @@ io.sockets.on("connection", function(socket) {
             console.log(users);
             // console.log("Remove at index " + index);
             // users[socket.curr_room] = users[socket.curr_room].splice(index, 1);
-            users[socket.curr_room] = users[socket.curr_room].filter(item => item !== socket.this_user)
+            if (users[socket.curr_room]) {
+                users[socket.curr_room] = users[socket.curr_room].filter(item => item !== socket.this_user)
+            }
             console.log(users);
             console.log(socket.this_user + " disconnected");
             io.sockets.emit("update_users", users);
@@ -66,21 +68,35 @@ io.sockets.on("connection", function(socket) {
         io.sockets.emit("get_users", users);
     });
 
-    socket.on('create', function(room) {
+    socket.on('create', function(data) {
+        // data.room_name = String(data.room_name);
+        users[data.room_name] = [];
 
-        socket.join(room["room_name"]);
+        if (data.password != "") {
+            users[data.room_name].push("");
+            users[data.room_name].push(data.password);
+        }
+        socket.join(data.room_name);
 
-        console.log("The room you joined is: " + room["room_name"]);
-        io.sockets.emit("add_to_roomlist", { room_name: room["room_name"] });
+        // console.log("The room you joined is: " + data["room_name"]);
+        io.sockets.emit("add_to_roomlist", data);
     });
 
-    socket.on('switch_room', function(join_data) {
+    socket.on('switch_room', function(data) {
         // This callback runs when the server receives a new message from the client.
 
-        console.log("message: " + join_data["message"]); // log it to the Node.JS output
-        socket.join(join_data["room_name"]);
+        // console.log("message: " + data["message"]); // log it to the Node.JS output
+        socket.join(data["room_name"]);
+        let us = data.user;
 
-        console.log("The room you joined is: " + join_data["room_name"]);
+        console.log(us + " is leaving " + data.old_room + " and joining " + data.room_name);
+        users[data.old_room] = users[data.old_room].filter(item => item !== us);
+        if (data.room_name) {
+            users[data.room_name].push(us);
+            socket.curr_room = data.room_name;
+        }
+
+        console.log("The room you joined is: " + data["room_name"]);
 
     });
 
