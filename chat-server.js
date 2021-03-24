@@ -1,6 +1,7 @@
 // Require the packages we will use:
 const http = require("http"),
     fs = require("fs");
+mine = require("mime");
 
 const port = 3456;
 const file = "client.html";
@@ -35,16 +36,31 @@ let users = { "Main Room": [] };
 
 io.sockets.on("connection", function(socket) {
     console.log("Connected!");
+    // let this_user = "";
+    // let curr_room = "";
 
     socket.on('join_server', function(data) {
-
-        // const user = {
-        // username,
-        // id: socket.id
-        // };
+        console.log(data.user + " connected");
+        socket.this_user = data.user;
+        socket.curr_room = data.room;
         users[data.room].push(data.user);
-        io.sockets.emit("new_user", users);
+        io.sockets.emit("update_users", users);
     });
+
+    socket.on("disconnect", function() {
+        if (socket.this_user) {
+            // let index = users[socket.curr_room].indexOf(socket.this_user);
+            console.log("Users before:");
+            console.log(users);
+            // console.log("Remove at index " + index);
+            // users[socket.curr_room] = users[socket.curr_room].splice(index, 1);
+            users[socket.curr_room] = users[socket.curr_room].filter(item => item !== socket.this_user)
+            console.log(users);
+            console.log(socket.this_user + " disconnected");
+            io.sockets.emit("update_users", users);
+        }
+
+    })
 
     socket.on('get_users', function() {
         io.sockets.emit("get_users", users);

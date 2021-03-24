@@ -425,6 +425,8 @@
                 socketio.emit("typing_off", username);
             }
         });
+        // TYPING: check here instead (not on server side), user gets all typing msgs but doesn't show 
+        // unless there's one already right? that sounds ez
 
 
         // LOGIN
@@ -505,7 +507,7 @@
 
         });
 
-        socketio.on("new_user", function(data) {
+        socketio.on("update_users", function(data) {
             console.log(data);
             if (username == "")
                 return;
