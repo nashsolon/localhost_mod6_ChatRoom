@@ -29,19 +29,21 @@ const io = socketio.listen(server);
 //Server side creating a new room
 
 
-let users = [];
+let users = { "Main Room": [] };
+
+// "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
 
 io.sockets.on("connection", function(socket) {
     console.log("Connected!");
 
-    socket.on('join_server', function(username) {
+    socket.on('join_server', function(data) {
 
-        const user = {
-            username,
-            id: socket.id
-        };
-        users.push(user);
-        io.sockets.emit("new_user", { users: users });
+        // const user = {
+        // username,
+        // id: socket.id
+        // };
+        users[data.room].push(data.user);
+        io.sockets.emit("new_user", users);
     });
 
     socket.on('create', function(room) {
