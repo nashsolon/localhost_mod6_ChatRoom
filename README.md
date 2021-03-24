@@ -17,3 +17,7 @@ TO DO:
 - Creator of room temporarily ban and permament ban from room
 - Username shows when they send a message
 - Username of everyone in room is shown
+
+
+
+- show curr user first in USERS, then just odn't print it if it's the curr_user later
