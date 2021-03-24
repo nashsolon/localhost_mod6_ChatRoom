@@ -223,6 +223,15 @@
             position: absolute;
         }
         
+        #create_room {
+            width: 30px;
+            height: 30px;
+            z-index: 1;
+            top: 95px;
+            right: 10px;
+            position: absolute;
+        }
+        
         #login_btn {
             box-sizing: border-box;
             width: 30px;
@@ -247,6 +256,10 @@
             text-align: left;
             font-size: 15pt;
             margin: 10px;
+        }
+        
+        .pass {
+            color: rgb(255, 151, 151);
         }
         /* .room_users {} */
         
@@ -273,18 +286,24 @@
             position: absolute;
             display: block;
             top: -2px;
-            right: 8px;
+            right: 20px;
         }
         
         #add_room {
             color: white;
             position: absolute;
             left: 20px;
+            top: -2px;
         }
         
         #new_room_name {
             height: 70px;
             margin-top: 100px;
+        }
+        
+        #room_pass {
+            height: 70px;
+            margin-top: 50px;
         }
     </style>
 
@@ -348,13 +367,14 @@
 
             <div id='create_popup'>
                 <div class="panel-header">
-                    <p>Create a Room</p>
+                    <p>Create Room</p>
                     <p class="btn" id="close_creation">
                         &lt; </p>
                 </div>
 
-                <input type="text" id="new_room_name" placeholder='room name' /> <br>
-                <p class='btn' id='create_room'>Create new room</p>
+                <input type="text" id="new_room_name" placeholder='Room name' />
+                <input type="text" id="room_pass" placeholder='Password (optional)' />
+                <p class='btn' id='create_room'>&#x279C;</p>
             </div>
 
             <p>Rooms</p>
@@ -416,19 +436,28 @@
         });
 
 
-        $("document").on('click', '.room_name', function() {
-            let room_name = $(this).text();
+        // $("document").on('click', '.room_name', function() {
+        // console.log("clicked on room name");
+        // let room_name = $(this).text();
+        // let old_room = $('#curr_room').text();
+        // $('#curr_room').text(room_name);
+
+        // $(".chat").empty();
+        // switchRoom(old_room, room_name);
+        // })
+
+
+
+        function switchRoom(old_room, room_name) {
             $('#curr_room').text(room_name);
 
             $(".chat").empty();
-            switchRoom(room_name);
-        })
-
-        function switchRoom(room_name) {
 
             console.log("You want to switch to: " + room_name);
             //Do not add room name yet. Added afterwards so all users can see it
             socketio.emit('switch_room', {
+                user: username,
+                old_room: old_room,
                 room_name: room_name,
                 message: 'you switched rooms!'
             });
@@ -557,8 +586,12 @@
         socketio.on("add_to_roomlist", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             let room_name = data['room_name'];
-            $('#room_list').append("<li class='room_name' >" + room_name + "</li>");
-
+            let pass = data.password;
+            if (pass != "") {
+                $('#room_list').append("<li class='room_name pass' >" + room_name + "</li>");
+            } else
+                $('#room_list').append("<li class='room_name' >" + room_name + "</li>");
+            refresh();
         });
 
         socketio.on("update_users", function(data) {
@@ -576,18 +609,20 @@
             }
         });
 
-        function createRoom() {
-            let room_name = $('#new_room_name').val();
-            console.log(room_name);
-            // $('#chat_header').empty();
-            // $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
-            //Do not add room name yet. Added afterwards so all users can see it
+        // function createRoom() {
+        //     let room_name = $('#new_room_name').val();
+        //     console.log(room_name);
+        //     // $('#chat_header').empty();
+        //     // $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
+        //     //Do not add room name yet. Added afterwards so all users can see it
 
-            socketio.emit('create', {
-                room_name: room_name,
-                message: 'you created a new room!'
-            });
-        }
+        //     socketio.emit('create', {
+        //         room_name: room_name,
+        //         message: 'you created a new room!'
+        //     });
+
+        // }
+
 
 
         // $("#send_message").click(function() {
@@ -596,14 +631,28 @@
 
         $("#create_room").click(function() {
             let room_name = $('#new_room_name').val();
-            console.log(room_name)
-            $('#curr_room').html(room_name);
-            $(".chat .msgs").empty();
-            socketio.emit('create', {
-                room_name: room_name,
-                message: 'you created a new room!',
-                user: username
-            });
+            if (room_name != "") {
+                // console.log(room_name)
+                // $('#curr_room').html(room_name);
+                // $(".chat .msgs").empty();
+
+                let old_room = $('#curr_room').text();
+                // $('#curr_room').text(room_name);
+
+                // $(".chat .msgs").empty();
+                $("#close_creation").click();
+                socketio.emit('create', {
+                    room_name: String(room_name),
+                    password: $('#room_pass').val(),
+                    user: username
+                });
+                switchRoom(old_room, room_name);
+            }
+        });
+        $("#new_room_name").keyup(function(event) {
+            if (event.keyCode === 13) {
+                $("#create_room").click();
+            }
         });
 
         $(document).ready(function() {
@@ -614,6 +663,15 @@
             //Implement when we have login/register working
 
         });
+
+        function refresh() {
+            $(".room_name").click(function() {
+                console.log("clicked on room name");
+                let room_name = $(this).text();
+                let old_room = $('#curr_room').text();
+                switchRoom(old_room, room_name);
+            });
+        }
     </script>
 </body>
 
