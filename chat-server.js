@@ -29,18 +29,21 @@ const io = socketio.listen(server);
 //Server side creating a new room
 
 
-let users = [];
+let users = { "Main Room": [] };
+
+// "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
 
 io.sockets.on("connection", function(socket) {
+    console.log("Connected!");
 
-    socket.on('join_server', function(username) {
+    socket.on('join_server', function(data) {
 
-        const user = {
-            username,
-            id: socket.id
-        };
-        users.push(user);
-        io.sockets.emit("new_user", { users: users });
+        // const user = {
+        // username,
+        // id: socket.id
+        // };
+        users[data.room].push(data.user);
+        io.sockets.emit("new_user", users);
     });
 
     socket.on('create', function(room) {
@@ -61,20 +64,23 @@ io.sockets.on("connection", function(socket) {
 
     });
 
-    io.sockets.on("connection", function(socket) {
-        socket.on('create', function(room) {
-            socket.join(room);
-            io.sockets.emit("create_room", { message: room["message"] });
-            console.log("New room name: " + room["room_name"]);
-        });
-        // This callback runs when a new Socket.IO connection is established.
 
-        socket.on('message_to_server', function(data) {
-            // This callback runs when the server receives a new message from the client.
+    socket.on('create', function(room) {
+        socket.join(room);
+        io.sockets.emit("create_room", { message: room["message"] });
+        console.log("New room name: " + room["room_name"]);
+    });
+    // This callback runs when a new Socket.IO connection is established.
 
-            // console.log("message: " + data["message"]); // log it to the Node.JS output
-            // console.log(data.user);
-            io.socket.emit("message_to_client", data); // broadcast the message to other users
-        });
+    socket.on('message_to_server', function(data) {
+        console.log(data);
+        // This callback runs when the server receives a new message from the client.
+
+        // console.log("message: " + data["message"]); // log it to the Node.JS output
+        // console.log(data.user);
+        io.sockets.emit("message_to_client", data); // broadcast the message to other users
     });
 });
+// io.sockets.on("disconnect", function() {
+
+// });
