@@ -106,13 +106,10 @@ io.sockets.on("connection", function(socket) {
             console.log("The password is " + password);
             socketio.emit('enter_password', {
                 password: password,
-                
+
             });
         }
-        console.log(data);
-
-
-        console.log("The room you joined is: " + data["room_name"]);
+        // console.log("The room you joined is: " + data["room_name"]);
 
     });
 
