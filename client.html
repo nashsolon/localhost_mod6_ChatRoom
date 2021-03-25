@@ -250,7 +250,8 @@
         }
         
         .room_name,
-        .user_name {
+        .user_name,
+        .pass-room {
             font-weight: normal;
             list-style-type: none;
             text-align: left;
@@ -258,7 +259,7 @@
             margin: 10px;
         }
         
-        .pass {
+        .pass-room {
             color: rgb(255, 151, 151);
         }
         /* .room_users {} */
@@ -377,6 +378,18 @@
                 <p class='btn' id='create_room'>&#x279C;</p>
             </div>
 
+            <div id='pass_popup'>
+                <div class="panel-header">
+                    <p>Enter Password</p>
+                    <p class="btn" id="close_pass">
+                        &lt; </p>
+                </div>
+
+                <input type="text" id="pass_attempt" placeholder='Enter Password' />
+                
+                <p class='btn' id='send_attempt'>&#x279C;</p>
+            </div>
+
             <p>Rooms</p>
             <ul id='room_list'>
                 <li class='room_name'>Main Room</li>
@@ -448,10 +461,10 @@
 
 
 
-        function switchRoom(old_room, room_name) {
+        function switchRoom(old_room, room_name, pass_value) {
             $('#curr_room').text(room_name);
 
-            $(".chat").empty();
+            $(".chat .msgs").empty();
 
             console.log("You want to switch to: " + room_name);
             //Do not add room name yet. Added afterwards so all users can see it
@@ -459,6 +472,7 @@
                 user: username,
                 old_room: old_room,
                 room_name: room_name,
+                pass_value: pass_value,
                 message: 'you switched rooms!'
             });
         }
@@ -468,6 +482,7 @@
             let room_name = $('#curr_room').text();
             let msg = $("#chat_text").val();
             // console.log(msg);
+            
             socketio.emit("message_to_server", {
                 room_name: room_name,
                 message: msg,
@@ -550,6 +565,7 @@
                 left: "0"
             }, 300);
         });
+        
 
         $("#close_creation").click(function() {
             $("#create_popup").animate({
@@ -588,11 +604,13 @@
             let room_name = data['room_name'];
             let pass = data.password;
             if (pass != "") {
-                $('#room_list').append("<li class='room_name pass' >" + room_name + "</li>");
+                $('#room_list').append("<li class='pass-room' >" + room_name + "</li>");
             } else
                 $('#room_list').append("<li class='room_name' >" + room_name + "</li>");
             refresh();
         });
+
+        
 
         socketio.on("update_users", function(data) {
             console.log(data);
@@ -607,6 +625,10 @@
                 if (this_user != username)
                     $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
             }
+        });
+
+        socketio.on("enter_password", function(data) {
+            
         });
 
         // function createRoom() {
@@ -646,7 +668,9 @@
                     password: $('#room_pass').val(),
                     user: username
                 });
-                switchRoom(old_room, room_name);
+                let pass_value = false;
+                // User who created room does not need to use password on creation
+                switchRoom(old_room, room_name, pass_value);
             }
         });
         $("#new_room_name").keyup(function(event) {
@@ -670,12 +694,23 @@
         });
 
         function refresh() {
+            $('.pass-room').click(function(){
+                let pass_value = true;
+                let room_name = $(this).text();
+                let old_room = $('#curr_room').text();
+                switchRoom(old_room, room_name, pass_value);
+
+            });
+
             $(".room_name").click(function() {
                 console.log("clicked on room name");
                 let room_name = $(this).text();
                 let old_room = $('#curr_room').text();
-                switchRoom(old_room, room_name);
+                let pass_value = false;
+                switchRoom(old_room, room_name, pass_value);
             });
+
+            
         }
     </script>
 </body>
