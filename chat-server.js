@@ -95,8 +95,7 @@ io.sockets.on("connection", function(socket) {
             users[data.room_name].push(us);
             socket.curr_room = data.room_name;
         }
-
-        console.log("The room you joined is: " + data["room_name"]);
+        // console.log("The room you joined is: " + data["room_name"]);
 
     });
 
