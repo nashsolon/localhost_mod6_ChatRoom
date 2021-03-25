@@ -654,6 +654,11 @@
                 $("#create_room").click();
             }
         });
+        $("#room_pass").keyup(function(event) {
+            if (event.keyCode === 13) {
+                $("#create_room").click();
+            }
+        })
 
         $(document).ready(function() {
             // $('#rooms_stuff').hide();
