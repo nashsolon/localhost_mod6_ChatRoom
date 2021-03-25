@@ -45,7 +45,7 @@ io.sockets.on("connection", function(socket) {
         socket.this_user = data.user;
         socket.curr_room = data.room;
         users[data.room].push(data.user);
-        io.sockets.emit("update_users", users);
+        io.sockets.emit("get_users", users);
     });
 
     socket.on("disconnect", function() {
@@ -78,39 +78,43 @@ io.sockets.on("connection", function(socket) {
             users[data.room_name].push(data.password);
         }
         socket.join(data.room_name);
-        
+
 
         // console.log("The room you joined is: " + data["room_name"]);
-        io.sockets.emit("add_to_roomlist", data);
+        // io.sockets.emit("add_to_roomlist", data);
+        io.sockets.emit("get_users", users)
     });
 
     socket.on('switch_room', function(data) {
         // This callback runs when the server receives a new message from the client.
 
         // console.log("message: " + data["message"]); // log it to the Node.JS output
-        if(data.pass_value == false){
-            socket.join(data["room_name"]);
-            let us = data.user;
-
-            
-
-            console.log(us + " is leaving " + data.old_room + " and joining " + data.room_name);
-            users[data.old_room] = users[data.old_room].filter(item => item !== us);
-            if (data.room_name) {
-                users[data.room_name].push(us);
-                socket.curr_room = data.room_name;
-            }
+        // if (data.pass_value == false) {
+        if (!data.old_room || !data.room_name) {
+            console.log("Bad\n-----");
+            console.log(data);
+            return;
         }
-        else{
-            password = users[data.room_name][1];
-            console.log("The password is " + password);
-            socketio.emit('enter_password', {
-                password: password,
 
-            });
+        socket.join(data["room_name"]);
+        let us = data.user;
+
+        console.log(us + " is leaving " + data.old_room + " and joining " + data.room_name);
+        users[data.old_room] = users[data.old_room].filter(item => item !== us);
+        if (data.room_name) {
+            users[data.room_name].push(us);
+            socket.curr_room = data.room_name;
         }
-        // console.log("The room you joined is: " + data["room_name"]);
+        // } else {
+        //     password = users[data.room_name][1];
+        //     console.log("The password is " + password);
+        //     socket.emit('enter_password', {
+        //         password: password,
 
+        //     });
+        // }
+        // // console.log("The room you joined is: " + data["room_name"]);
+        io.sockets.emit("get_users", users);
     });
 
     typing = "";
@@ -127,19 +131,37 @@ io.sockets.on("connection", function(socket) {
             typing = "";
             socket.broadcast.emit('typing_off');
         }
+    });
+
+    socket.on("pass_attempt", function(data) {
+        // .pass, .room
+        // console.log("Pass: " + data.pass + ", Room: " + data.room);
+        // console.log("Pass is " + data.pass);
+        console.log(data);
+        if (users[data.room][0] == "") {
+            let real_pass = users[data.room][1];
+            let correct = real_pass == data.pass;
+            console.log(correct);
+            io.sockets.emit("pass_attempt", correct);
+        }
+    });
+
+    socket.on("get_rooms", function() {
+        let all_rooms = Object.keys(users);
+        socket.emit("get_rooms", all_rooms);
     })
 
- 
+
     // This callback runs when a new Socket.IO connection is established.
 
     socket.on('message_to_server', function(data) {
         console.log(data);
-        
+
         // This callback runs when the server receives a new message from the client.
 
         // console.log("message: " + data["message"]); // log it to the Node.JS output
         // console.log(data.user);
-        
+
         io.in(data.room_name).emit("message_to_client", data); // broadcast the message to other users
     });
 });
