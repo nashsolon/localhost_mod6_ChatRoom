@@ -99,6 +99,29 @@ io.sockets.on("connection", function(socket) {
         socket.join(data["room_name"]);
         let us = data.user;
 
+        if(users[data.room_name].length == 0 || users[data.room_name].length == 2)
+        {
+            users[data.room_name].push("admin:"+us);
+            
+        }
+
+        if(users[data.room_name][0] == "")
+        {
+            admin = users[data.room_name][2].split(":")[1];
+            console.log("The admin of " + data.room_name + "is: " + admin);
+        }
+        else{
+            admin = users[data.room_name][0].split(":")[1];
+            console.log("The admin of " + data.room_name + "is: " + admin);
+        }
+
+        if(us == admin){
+            console.log("You are the admin in the room " + data.room_name);
+            socket.emit("admin", users);
+        }
+        admin = users[data.room_name]
+        io.sockets.emit("get_users", users);
+
         console.log(us + " is leaving " + data.old_room + " and joining " + data.room_name);
         users[data.old_room] = users[data.old_room].filter(item => item !== us);
         if (data.room_name && !users[data.room_name].includes(us)) {
@@ -114,6 +137,7 @@ io.sockets.on("connection", function(socket) {
         //     });
         // }
         // // console.log("The room you joined is: " + data["room_name"]);
+        console.log(users);
         io.sockets.emit("get_users", users);
     });
 
