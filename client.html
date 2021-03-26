@@ -444,7 +444,7 @@
 
         function switchRoom(old_room, room_name) {
 
-
+            console.log("when switching rooms, the room name is now" + room_name)
             $('#curr_room').text(room_name);
             $(".chat .msgs").empty();
             console.log("You want to switch to: " + room_name);
@@ -642,7 +642,7 @@
                     $('#room_list').append("<li class='room_name pass' >" + this_room + "</li>");
                 else
                     $('#room_list').append("<li class='room_name' >" + this_room + "</li>");
-                refresh();
+                // refresh();
             }
         });
 
@@ -708,15 +708,13 @@
             }
         })
 
-        $(document).ready(function() {
-            // $('#rooms_stuff').hide();
-            // $('#messaging_stuff').hide();
-            // $('#chat_header').hide();
-            // $('#messaging_to_room').hide();
-            //Implement when we have login/register working
-
+        
+        $("#pass_attempt").keyup(function(event) {
+            if (event.keyCode === 13) {
+                console.log("uh what");
+                $("#send_attempt").click();
+            }
         });
-
 
         $("#send_attempt").click(function() {
             let pass_attempt = $("#pass_attempt").val();
@@ -724,13 +722,14 @@
             let old_room = $('#curr_room').text();
             socketio.emit("pass_attempt", {
                 pass: pass_attempt,
-                room: next_room
+                next_room: next_room
             });
-            socketio.on("pass_attempt", function(correct) {
+            socketio.on("pass_attempt", function(data) {
                 // console.log("Got back a " + correct + " from the server");
-                if (correct) {
+                if (data.correct) {
                     console.log("Correct Password")
-                    switchRoom(old_room, next_room);
+                    console.log("Password was correct and we will now switch to: " + data.next_room)
+                    switchRoom(old_room, data.next_room);
                     $("#pass_popup").animate({
                         left: "-500px"
                     }, 300)
@@ -739,30 +738,14 @@
                     console.log("Wrong Password");
                 }
             });
-
-
-            // switchRoom(old_room, room_name);
-        });
-        $("#pass_attempt").keyup(function(event) {
-            if (event.keyCode === 13) {
-                console.log("uh what");
-                $("#send_attempt").click();
-            }
         });
 
         let next_room = "";
 
-        function refresh() {
-            // $('.pass-room').click(function() {
-            //     let pass_value = true;
-            //     let room_name = $(this).text();
-            //     let old_room = $('#curr_room').text();
-            //     switchRoom(old_room, room_name, pass_value);
-
-            // });
+        
 
             // ALSO RESET IF GET OUT OF PASS ATTEMPT
-            $(".room_name").click(function() {
+            $(document).on('click', '.room_name' , function() {
                 // console.log("clicked on room name");
                 let old_room = $('#curr_room').text();
                 let room_name = $(this).text();
@@ -770,6 +753,7 @@
                     return;
                 }
                 next_room = room_name;
+
 
                 if ($(this).hasClass("pass")) {
                     // let pass_value = false;
@@ -788,7 +772,9 @@
             });
 
 
-        }
+
+
+        
     </script>
 </body>
 

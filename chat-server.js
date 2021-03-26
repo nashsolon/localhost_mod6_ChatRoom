@@ -138,11 +138,11 @@ io.sockets.on("connection", function(socket) {
         // console.log("Pass: " + data.pass + ", Room: " + data.room);
         // console.log("Pass is " + data.pass);
         console.log(data);
-        if (users[data.room][0] == "") {
-            let real_pass = users[data.room][1];
+        if (users[data.next_room][0] == "") {
+            let real_pass = users[data.next_room][1];
             let correct = real_pass == data.pass;
             console.log(correct);
-            io.sockets.emit("pass_attempt", correct);
+            io.sockets.emit("pass_attempt", {correct: correct, next_room: data.next_room});
         }
     });
 
