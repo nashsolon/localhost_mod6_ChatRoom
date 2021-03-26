@@ -421,13 +421,13 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
-        socketio.on("new_user", function(users) {
-            user_array = users['users'];
-            for (user in user_array) {
-                // $('#user_list').append("<li class='user_name' >" + user +  "</li>");
-            }
+        // socketio.on("new_user", function(users) {
+        //     user_array = users['users'];
+        //     for (user in user_array) {
+        //         // $('#user_list').append("<li class='user_name' >" + user +  "</li>");
+        //     }
 
-        });
+        // });
 
 
         // $("document").on('click', '.room_name', function() {
@@ -622,9 +622,10 @@
                 return;
             $("#user_list").empty();
             let these_users = data[$('#curr_room').text()]
+            let start = these_users[0] == "" ? 2 : 0;
             console.log(username);
             $("#user_list").append("<li class='user_name me'>" + username + "</li>");
-            for (let i = 0; i < these_users.length; i++) {
+            for (let i = start; i < these_users.length; i++) {
                 let this_user = these_users[i];
                 if (this_user != username)
                     $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
@@ -708,7 +709,7 @@
             }
         })
 
-        
+
         $("#pass_attempt").keyup(function(event) {
             if (event.keyCode === 13) {
                 console.log("uh what");
@@ -742,39 +743,34 @@
 
         let next_room = "";
 
-        
-
-            // ALSO RESET IF GET OUT OF PASS ATTEMPT
-            $(document).on('click', '.room_name' , function() {
-                // console.log("clicked on room name");
-                let old_room = $('#curr_room').text();
-                let room_name = $(this).text();
-                if (old_room == room_name) {
-                    return;
-                }
-                next_room = room_name;
 
 
-                if ($(this).hasClass("pass")) {
-                    // let pass_value = false;
-                    console.log("There's a password");
-                    // FIRST get the password
-                    // check do we have it
-                    // then ->
-                    // bring up send_attempt stuff
-                    $("#pass_popup").animate({
-                        left: "0"
-                    }, 300);
-
-                } else {
-                    switchRoom(old_room, room_name);
-                }
-            });
+        // ALSO RESET IF GET OUT OF PASS ATTEMPT
+        $(document).on('click', '.room_name', function() {
+            // console.log("clicked on room name");
+            let old_room = $('#curr_room').text();
+            let room_name = $(this).text();
+            if (old_room == room_name) {
+                return;
+            }
+            next_room = room_name;
 
 
+            if ($(this).hasClass("pass")) {
+                // let pass_value = false;
+                console.log("There's a password");
+                // FIRST get the password
+                // check do we have it
+                // then ->
+                // bring up send_attempt stuff
+                $("#pass_popup").animate({
+                    left: "0"
+                }, 300);
 
-
-        
+            } else {
+                switchRoom(old_room, room_name);
+            }
+        });
     </script>
 </body>
 

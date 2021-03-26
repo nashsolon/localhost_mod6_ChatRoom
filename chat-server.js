@@ -101,7 +101,7 @@ io.sockets.on("connection", function(socket) {
 
         console.log(us + " is leaving " + data.old_room + " and joining " + data.room_name);
         users[data.old_room] = users[data.old_room].filter(item => item !== us);
-        if (data.room_name) {
+        if (data.room_name && !users[data.room_name].includes(us)) {
             users[data.room_name].push(us);
             socket.curr_room = data.room_name;
         }
@@ -142,7 +142,7 @@ io.sockets.on("connection", function(socket) {
             let real_pass = users[data.next_room][1];
             let correct = real_pass == data.pass;
             console.log(correct);
-            io.sockets.emit("pass_attempt", {correct: correct, next_room: data.next_room});
+            io.sockets.emit("pass_attempt", { correct: correct, next_room: data.next_room });
         }
     });
 
