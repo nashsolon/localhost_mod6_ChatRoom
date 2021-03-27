@@ -157,8 +157,12 @@ io.sockets.on("connection", function(socket) {
     socket.on('private_message', function(data) {
         console.log(data);
         id_receiver = ids[data.receiver];
+        id_sender = ids[data.sender];
+        private_ids = [id_receiver, id_sender];
+        //console.log("the id of the receiver is " + id_receiver);
+        io.in(private_ids).emit("p_message" , data);
+        
         console.log("the id of the receiver is " + id_receiver);
-        //socket.to(anotherSocketId).emit("private message", socket.id, msg);
     });
 
     socket.on('typing_off', function(username) {

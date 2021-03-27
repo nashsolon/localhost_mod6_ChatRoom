@@ -145,16 +145,19 @@
             display: none;
         }
         
-        .chat p {
+        .chat p,
+        .private_chat p {
             font-size: 15pt;
             margin: 10px;
         }
         
-        .chat strong {
+        .chat strong,
+        .private_chat strong {
             color: var(--other-users-color);
         }
         
-        .chat .me {
+        .chat .me,
+        .private_chat .me {
             color: var(--this-user-color);
         }
         
@@ -421,6 +424,8 @@
         <ul id='user_list'>
             <!-- <li class='user_name'>Sasha</li> -->
         </ul>
+
+        
     </div>
 
     <div id='private_popup'>
@@ -433,6 +438,12 @@
         <input type="text" id="private_message" placeholder='Enter Message' />
 
         <p class='btn' id='send_private'>&#x279C;</p>
+
+        <div class="private_chat">
+            <div class="private_msgs">
+            </div>
+        </div>
+        
     </div>
 
     <script>
@@ -747,15 +758,34 @@
 
                 $('#private_header').append('<p id = "receiver">' + $(this).text() + '</p>');
 
-                $('#send_private').click( function() {
-                    socketio.emit("private_message", {
-                        sender: username,
-                        receiver: $('#receiver').text(),
-                        private_message: $('#private_message').val()
-                    });
-                });
+                
+                
             });
         }
+
+        $('#send_private').click( function() {
+            socketio.emit("private_message", {
+                sender: username,
+                receiver: $('#receiver').text(),
+                private_message: $('#private_message').val()
+            });
+        });
+
+        socketio.on("p_message", function(data) {
+
+
+            if (data.sender == username){
+                console.log("The receiver is " + data.receiver);
+                console.log("The sender is " + data.sender);
+                $(".private_chat .private_msgs").append("<p><strong class='me'>" + data.sender + ":</strong> " + data.private_message + "</p>");
+            }
+            else if (data.receiver == username){
+                $(".private_chat .private_msgs").append("<p><strong>" + data.sender + ":</strong> " + data.private_message + "</p>");
+            }
+            
+        });
+        
+        
 
         $("#new_room_name").keyup(function(event) {
             if (event.keyCode === 13) {
