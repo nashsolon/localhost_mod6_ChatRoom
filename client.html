@@ -323,8 +323,8 @@
             height: 70px;
             margin-top: 100px;
         }
-
-        #private_message{
+        
+        #private_message {
             height: 70px;
             margin-top: 120px;
         }
@@ -339,10 +339,15 @@
             top: 90px;
             right: 12px;
         }
+        
         #send_private {
             position: absolute;
             top: 110px;
             right: 12px;
+        }
+        
+        .private_msgs {
+            text-align: left;
         }
     </style>
 
@@ -425,12 +430,12 @@
             <!-- <li class='user_name'>Sasha</li> -->
         </ul>
 
-        
+
     </div>
 
     <div id='private_popup'>
         <div class="panel-header">
-            <p id = 'private_header'>Private Message</p>
+            <p id='private_header'>Private Message</p>
             <p class="btn" id="close_private">
                 > </p>
         </div>
@@ -443,7 +448,7 @@
             <div class="private_msgs">
             </div>
         </div>
-        
+
     </div>
 
     <script>
@@ -657,6 +662,7 @@
         // });
 
 
+        // {"Secret Room": ["", "password", "admin:nash", "sasha", "max", ...]}
 
         socketio.on("get_users", function(data) {
             console.log(data);
@@ -664,14 +670,14 @@
                 return;
             $("#user_list").empty();
             let these_users = data[$('#curr_room').text()]
-            let start = these_users[0] == "" ? 2 : 0;
+            let start = these_users[0] == "" ? 3 : 0;
             console.log(username);
             $("#user_list").append("<li class='user_name me'>" + username + "</li>");
             for (let i = start; i < these_users.length; i++) {
                 let this_user = these_users[i];
                 if (this_user != username)
                     $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
-                    
+
             }
             refresh_users();
 
@@ -743,14 +749,14 @@
             }
         });
 
-        
+
         socketio.on("admin", function(users) {
             console.log("You are the admin and now on the client side");
-            
+
         });
 
-        function refresh_users(){
-            $('.user_name').click( function() {
+        function refresh_users() {
+            $('.user_name').click(function() {
                 console.log("Private message this user");
                 $("#private_popup").animate({
                     right: "0"
@@ -758,12 +764,12 @@
 
                 $('#private_header').append('<p id = "receiver">' + $(this).text() + '</p>');
 
-                
-                
+
+
             });
         }
 
-        $('#send_private').click( function() {
+        $('#send_private').click(function() {
             socketio.emit("private_message", {
                 sender: username,
                 receiver: $('#receiver').text(),
@@ -774,18 +780,17 @@
         socketio.on("p_message", function(data) {
 
 
-            if (data.sender == username){
+            if (data.sender == username) {
                 console.log("The receiver is " + data.receiver);
                 console.log("The sender is " + data.sender);
                 $(".private_chat .private_msgs").append("<p><strong class='me'>" + data.sender + ":</strong> " + data.private_message + "</p>");
-            }
-            else if (data.receiver == username){
+            } else if (data.receiver == username) {
                 $(".private_chat .private_msgs").append("<p><strong>" + data.sender + ":</strong> " + data.private_message + "</p>");
             }
-            
+
         });
-        
-        
+
+
 
         $("#new_room_name").keyup(function(event) {
             if (event.keyCode === 13) {
@@ -835,7 +840,7 @@
 
 
         // ALSO RESET IF GET OUT OF PASS ATTEMPT
-        function refresh(){
+        function refresh() {
             $('.room_name').click(function() {
                 // console.log("clicked on room name");
                 let old_room = $('#curr_room').text();
