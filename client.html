@@ -36,7 +36,8 @@
             /* filter: blur(0px); */
         }
         
-        .room-users {
+        .room-users,
+        #private_popup {
             box-sizing: border-box;
             height: 100%;
             width: 25%;
@@ -76,7 +77,8 @@
         .left-panel .panel-header,
         .room-users .panel-header,
         #pass_popup .panel-header,
-        #create_popup .panel-header {
+        #create_popup .panel-header,
+        #private_popup .panel-header {
             background-color: var(--left-panel-bg);
         }
         
@@ -279,7 +281,8 @@
             margin-top: 9px;
         }
         
-        #close_users {
+        #close_users,
+        #close_private {
             box-sizing: border-box;
             color: white;
             position: absolute;
@@ -317,6 +320,11 @@
             height: 70px;
             margin-top: 100px;
         }
+
+        #private_message{
+            height: 70px;
+            margin-top: 120px;
+        }
         
         #room_pass {
             height: 70px;
@@ -326,6 +334,11 @@
         #send_attempt {
             position: absolute;
             top: 90px;
+            right: 12px;
+        }
+        #send_private {
+            position: absolute;
+            top: 110px;
             right: 12px;
         }
     </style>
@@ -408,6 +421,18 @@
         <ul id='user_list'>
             <!-- <li class='user_name'>Sasha</li> -->
         </ul>
+    </div>
+
+    <div id='private_popup'>
+        <div class="panel-header">
+            <p id = 'private_header'>Private Message</p>
+            <p class="btn" id="close_private">
+                > </p>
+        </div>
+
+        <input type="text" id="private_message" placeholder='Enter Message' />
+
+        <p class='btn' id='send_private'>&#x279C;</p>
     </div>
 
     <script>
@@ -557,6 +582,12 @@
             }, 300)
         });
 
+        $("#close_private").click(function() {
+            $("#private_popup").animate({
+                right: "-500px"
+            }, 300)
+        });
+
         $("#add_room").click(function() {
             $("#create_popup").animate({
                 left: "0"
@@ -629,7 +660,9 @@
                 let this_user = these_users[i];
                 if (this_user != username)
                     $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
+                    
             }
+            refresh_users();
 
             $("#room_list").empty();
             let all_rooms = Object.keys(data);
@@ -702,12 +735,25 @@
         
         socketio.on("admin", function(users) {
             console.log("You are the admin and now on the client side");
-            refresh_users();
+            
         });
 
         function refresh_users(){
             $('.user_name').click( function() {
-                console.log("You are the admin and now you just clicked on a user");
+                console.log("Private message this user");
+                $("#private_popup").animate({
+                    right: "0"
+                }, 300);
+
+                $('#private_header').append('<p id = "receiver">' + $(this).text() + '</p>');
+
+                $('#send_private').click( function() {
+                    socketio.emit("private_message", {
+                        sender: username,
+                        receiver: $('#receiver').text(),
+                        private_message: $('#private_message').val()
+                    });
+                });
             });
         }
 

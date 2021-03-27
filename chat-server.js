@@ -31,6 +31,7 @@ const io = socketio.listen(server);
 
 
 let users = { "Main Room": [] };
+let ids = {};
 
 // "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
 
@@ -45,6 +46,8 @@ io.sockets.on("connection", function(socket) {
         socket.this_user = data.user;
         socket.curr_room = data.room;
         users[data.room].push(data.user);
+        ids[data.user] = socket.id;
+        console.log(ids);
         io.sockets.emit("get_users", users);
     });
 
@@ -99,7 +102,7 @@ io.sockets.on("connection", function(socket) {
         socket.join(data["room_name"]);
         let us = data.user;
 
-        if(users[data.room_name].length == 0 || users[data.room_name].length == 2)
+        if(users[data.room_name].length == 0 || users[data.room_name].length == 2 && users[data.room_name][0].split(":")[0] != "admin")
         {
             users[data.room_name].push("admin:"+us);
             
@@ -124,6 +127,7 @@ io.sockets.on("connection", function(socket) {
 
         console.log(us + " is leaving " + data.old_room + " and joining " + data.room_name);
         users[data.old_room] = users[data.old_room].filter(item => item !== us);
+        socket.leave(data.old_room);
         if (data.room_name && !users[data.room_name].includes(us)) {
             users[data.room_name].push(us);
             socket.curr_room = data.room_name;
@@ -148,6 +152,13 @@ io.sockets.on("connection", function(socket) {
             typing = username;
             socket.broadcast.emit('typing', username);
         }
+    });
+
+    socket.on('private_message', function(data) {
+        console.log(data);
+        id_receiver = ids[data.receiver];
+        console.log("the id of the receiver is " + id_receiver);
+        //socket.to(anotherSocketId).emit("private message", socket.id, msg);
     });
 
     socket.on('typing_off', function(username) {
