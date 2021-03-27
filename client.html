@@ -597,6 +597,8 @@
             $("#private_popup").animate({
                 right: "-500px"
             }, 300)
+            $(".private_msgs").empty();
+            
         });
 
         $("#add_room").click(function() {
@@ -755,15 +757,16 @@
                 $("#private_popup").animate({
                     right: "0"
                 }, 300);
-
-                $('#private_header').append('<p id = "receiver">' + $(this).text() + '</p>');
-
+                $('#private_header').empty();
+                $('#private_header').append('<p> Private Message </p> <p id = "receiver">' +  $(this).text() + '</p>');
+                
                 
                 
             });
         }
 
         $('#send_private').click( function() {
+
             socketio.emit("private_message", {
                 sender: username,
                 receiver: $('#receiver').text(),
@@ -781,6 +784,9 @@
             }
             else if (data.receiver == username){
                 $(".private_chat .private_msgs").append("<p><strong>" + data.sender + ":</strong> " + data.private_message + "</p>");
+                $("#private_popup").animate({
+                right: "0px"
+                }, 300)
             }
             
         });
