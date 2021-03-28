@@ -451,8 +451,8 @@
 
         <!-- Only show whne we are the admin -->
         <div id='admin_powers'>
-            <p class='btn' id = "ban_user"></p> 
-            <p class='btn' id = "kick_user"></p>
+            <p class='btn' id="ban_user"></p>
+            <p class='btn' id="kick_user"></p>
         </div>
     </div>
 
@@ -613,6 +613,7 @@
         });
 
         $("#add_room").click(function() {
+            $("#room_pass").val("");
             $("#create_popup").animate({
                 left: "0"
             }, 300);
@@ -763,7 +764,7 @@
 
         function refresh_users() {
             $('.user_name').click(function() {
-                
+
 
                 // This is the part where we append the user that we are private messaging to the header
                 console.log("Private message this user");
@@ -875,7 +876,7 @@
                     // console.log("Has a password? " + $(this).hasClass("pass"));
                     let has_pass = data.info.password;
                     // console.log(room_name)
-                    if (data.is_admin){
+                    if (data.is_admin) {
                         $('#ban_user').html('Ban User');
                         $('#kick_user').html('Kick User');
                         refresh_admin(data.room_name);
@@ -899,7 +900,9 @@
             });
         }
 
-        function refresh_admin(room_name){
+        function refresh_admin(room_name) {
+            $("#ban_user").off("click");
+            $("#kick_user").off("click");
             $('#ban_user').click(function() {
                 let other_user = $('#receiver').text();
                 console.log('You are the admin and the other user you want to ban is ' + other_user + 'from the room' + room_name);
@@ -911,7 +914,7 @@
 
             });
             $('#kick_user').click(function() {
-                
+
             });
         }
     </script>
