@@ -485,10 +485,10 @@
 
         function switchRoom(old_room, room_name) {
 
-            console.log("when switching rooms, the room name is now" + room_name)
+            // console.log("when switching rooms, the room name is now" + room_name)
             $('#curr_room').text(room_name);
             $(".chat .msgs").empty();
-            console.log("You want to switch to: " + room_name);
+            // console.log("You want to switch to: " + room_name);
             socketio.emit('switch_room', {
                 user: username,
                 old_room: old_room,
@@ -556,13 +556,14 @@
         // LOGIN
         $("#login_btn").click(function() {
             socketio.emit("get_users");
-            socketio.on("get_users", function(users) {
-                console.log(users);
-                let login = !users[$('#curr_room').text()].includes($("#user").val());
+            socketio.on("get_users", function(info) {
+                users = info[$('#curr_room').text()].users;
+                // console.log(users);
+                let login = !users.includes($("#user").val());
                 login = $("#user").val() == "" ? false : login;
-                console.log(login);
+                // console.log(login);
                 if (login) {
-                    console.log("Login " + $("#user").val());
+                    // console.log("Login " + $("#user").val());
                     socketio.emit("join_server", {
                         user: $("#user").val(),
                         room: $('#curr_room').text()
@@ -572,7 +573,7 @@
                     loginUser($("#user").val());
                     $("#user").val("");
                 } else {
-                    console.log("Cannot login " + $("#user").val());
+                    // console.log("Cannot login " + $("#user").val());
                 }
             });
         })
@@ -639,7 +640,7 @@
 
         socketio.on("message_to_client", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
-            console.log("Received message");
+            // console.log("Received message");
             if (data.user == username)
                 $(".chat .msgs").append("<p><strong class='me'>" + data.user + ":</strong> " + data.message + "</p>");
             else
@@ -666,16 +667,16 @@
 
         // {"Secret Room": ["", "password", "admin:nash", "sasha", "max", ...]}
 
-        socketio.on("get_users", function(data) {
-            console.log(data);
+        socketio.on("get_users", function(info) {
+            console.log(info);
             if (username == "")
                 return;
             $("#user_list").empty();
-            let these_users = data[$('#curr_room').text()]
-            let start = these_users[0] == "" ? 3 : 0;
-            console.log(username);
+            let these_users = info[$('#curr_room').text()].users;
+            // let start = these_users[0] == "" ? 3 : 0;
+            // console.log(username);
             $("#user_list").append("<li class='user_name me'>" + username + "</li>");
-            for (let i = start; i < these_users.length; i++) {
+            for (let i = 0; i < these_users.length; i++) {
                 let this_user = these_users[i];
                 if (this_user != username)
                     $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
@@ -684,14 +685,16 @@
             refresh_users();
 
             $("#room_list").empty();
-            let all_rooms = Object.keys(data);
-            console.log(all_rooms);
+            let all_rooms = Object.keys(info);
+            // console.log(all_rooms);
             for (let i = 0; i < all_rooms.length; i++) {
                 let this_room = all_rooms[i];
-                let pass = data[this_room][0] == "" ? data[this_room][1] : "";
-                if (this_room == $("#curr_room").text())
+                let pass = info[this_room].password;
+                if (this_room == $("#curr_room").text() && pass)
+                    $("#room_list").append("<li class='room_name curr pass' >" + this_room + "</li>");
+                else if (this_room == $("#curr_room").text() && !pass)
                     $("#room_list").append("<li class='room_name curr' >" + this_room + "</li>");
-                else if (pass != "")
+                else if (pass)
                     $('#room_list').append("<li class='room_name pass' >" + this_room + "</li>");
                 else
                     $('#room_list').append("<li class='room_name' >" + this_room + "</li>");
@@ -749,12 +752,6 @@
                     }
                 });
             }
-        });
-
-
-        socketio.on("admin", function(users) {
-            console.log("You are the admin and now on the client side");
-
         });
 
         function refresh_users() {
@@ -820,6 +817,7 @@
             console.log("It's " + next_room);
             let old_room = $('#curr_room').text();
             socketio.emit("pass_attempt", {
+                user: username,
                 pass: pass_attempt,
                 next_room: next_room
             });
@@ -845,6 +843,7 @@
 
         // ALSO RESET IF GET OUT OF PASS ATTEMPT
         function refresh() {
+            $(".room_name").off("click");
             $('.room_name').click(function() {
                 // console.log("clicked on room name");
                 let old_room = $('#curr_room').text();
@@ -853,22 +852,32 @@
                     return;
                 }
                 next_room = room_name;
+                socketio.emit("isAdmin", {
+                    user: username,
+                    room: room_name
+                });
+                socketio.on("isAdmin", function(data) {
+                    console.log(username + " is the admin? " + data.is_admin);
+                    console.log(data);
+                    // console.log("Has a password? " + $(this).hasClass("pass"));
+                    let has_pass = data.info.password;
+                    // console.log(room_name)
+                    if (has_pass && !data.is_admin) {
+                        // let pass_value = false;
+                        console.log("There's a password");
+                        // FIRST get the password
+                        // check do we have it
+                        // then ->
+                        // bring up send_attempt stuff
+                        $("#pass_popup").animate({
+                            left: "0"
+                        }, 300);
 
-
-                if ($(this).hasClass("pass")) {
-                    // let pass_value = false;
-                    console.log("There's a password");
-                    // FIRST get the password
-                    // check do we have it
-                    // then ->
-                    // bring up send_attempt stuff
-                    $("#pass_popup").animate({
-                        left: "0"
-                    }, 300);
-
-                } else {
-                    switchRoom(old_room, room_name);
-                }
+                    } else {
+                        // console.log("WHATOIJAE: OIJE:OGI JEWOG JQI#OGN")
+                        switchRoom(old_room, room_name);
+                    }
+                });
             });
         }
     </script>
