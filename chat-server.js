@@ -30,7 +30,7 @@ const io = socketio.listen(server);
 //Server side creating a new room
 
 
-let info = { "Main Room": { password: null, admin: null, users: [] } };
+let info = { "Main Room": { password: null, admin: null, users: [], banned_users: [] } };
 let ids = {};
 
 // "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
@@ -74,7 +74,7 @@ io.sockets.on("connection", function(socket) {
 
     socket.on('create', function(data) {
         // data.room_name = String(data.room_name);
-        info[data.room_name] = { password: null, admin: null, users: [] };
+        info[data.room_name] = { password: null, admin: null, users: [], banned_users: [] };
 
         if (data.password != "") {
             // users[data.room_name].push("");
@@ -195,8 +195,15 @@ io.sockets.on("connection", function(socket) {
         // console.log("Is " + data.user + " the admin???????");
         let thing = data.user == info[data.room].admin;
         // console.log(thing + ": He is " + data.user + ", admin is " + info[data.room].admin);
-        socket.emit("isAdmin", { is_admin: thing, info: info[data.room] });
+        socket.emit("isAdmin", {room_name: data.room, is_admin: thing, info: info[data.room] });
     });
+
+    socket.on("ban_user", function(data) {
+        info[data.room].banned_users.push(data.other_user);
+        console.log(info[data.room]);
+        //socket.emit("ban_user", {});
+    });
+
 });
 // io.sockets.on("disconnect", function() {
 

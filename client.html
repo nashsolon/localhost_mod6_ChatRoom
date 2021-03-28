@@ -449,6 +449,11 @@
             </div>
         </div>
 
+        <!-- Only show whne we are the admin -->
+        <div id='admin_powers'>
+            <p class='btn' id = "ban_user"></p> 
+            <p class='btn' id = "kick_user"></p>
+        </div>
     </div>
 
     <script>
@@ -733,7 +738,9 @@
             if (room_name != "") {
 
                 let old_room = $('#curr_room').text();
-
+                $('#ban_user').html('Ban User');
+                $('#kick_user').html('Kick User');
+                refresh_admin(room_name);
                 socketio.emit("get_rooms");
                 socketio.on("get_rooms", function(all_rooms) {
                     if (!all_rooms.includes(room_name)) {
@@ -756,6 +763,9 @@
 
         function refresh_users() {
             $('.user_name').click(function() {
+                
+
+                // This is the part where we append the user that we are private messaging to the header
                 console.log("Private message this user");
                 $("#private_popup").animate({
                     right: "0"
@@ -767,7 +777,7 @@
         }
 
         $('#send_private').click(function() {
-
+            //If we want to send a private message, we send info to the server
             socketio.emit("private_message", {
                 sender: username,
                 receiver: $('#receiver').text(),
@@ -775,14 +785,17 @@
             });
         });
 
+        //Server sends back emit to only our sender and our receiver
         socketio.on("p_message", function(data) {
 
-
+            //If we are the sender, then we append to private chat
             if (data.sender == username) {
                 console.log("The receiver is " + data.receiver);
                 console.log("The sender is " + data.sender);
                 $(".private_chat .private_msgs").append("<p><strong class='me'>" + data.sender + ":</strong> " + data.private_message + "</p>");
-            } else if (data.receiver == username) {
+            }
+            //If we are the receiver, we popup the private message chat 
+            else if (data.receiver == username) {
                 $(".private_chat .private_msgs").append("<p><strong>" + data.sender + ":</strong> " + data.private_message + "</p>");
                 $("#private_popup").animate({
                     right: "0px"
@@ -862,6 +875,11 @@
                     // console.log("Has a password? " + $(this).hasClass("pass"));
                     let has_pass = data.info.password;
                     // console.log(room_name)
+                    if (data.is_admin){
+                        $('#ban_user').html('Ban User');
+                        $('#kick_user').html('Kick User');
+                        refresh_admin(data.room_name);
+                    }
                     if (has_pass && !data.is_admin) {
                         // let pass_value = false;
                         console.log("There's a password");
@@ -878,6 +896,22 @@
                         switchRoom(old_room, room_name);
                     }
                 });
+            });
+        }
+
+        function refresh_admin(room_name){
+            $('#ban_user').click(function() {
+                let other_user = $('#receiver').text();
+                console.log('You are the admin and the other user you want to ban is ' + other_user + 'from the room' + room_name);
+                socketio.emit("ban_user", {
+                    user: username,
+                    room: room_name,
+                    other_user: other_user
+                });
+
+            });
+            $('#kick_user').click(function() {
+                
             });
         }
     </script>
