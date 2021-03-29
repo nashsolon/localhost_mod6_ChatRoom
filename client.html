@@ -529,7 +529,8 @@
             socketio.emit("message_to_server", {
                 room: room_name,
                 message: msg,
-                user: username
+                user: username,
+                room: room_name
             });
         }
 
@@ -987,9 +988,13 @@
         }
         
         socketio.on("ban_user", function(data){
-                    console.log("Got to client side of banning user");
-                    switchRoom(data.banned_room, "Main Room");
-                });
+            console.log("Got to client side of banning user");
+            switchRoom(data.banned_room, "Main Room");
+        });
+
+        
+
+
     </script>
 </body>
 
