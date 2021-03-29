@@ -527,7 +527,7 @@
             // console.log(msg);
 
             socketio.emit("message_to_server", {
-                room_name: room_name,
+                room: room_name,
                 message: msg,
                 user: username
             });
@@ -776,6 +776,8 @@
 
         $("#create_room").click(function() {
             let room_name = $('#new_room_name').val();
+            // let explicit = $('#room_explicit').checked();
+            let explicit = false;
             if (room_name != "") {
 
                 let old_room = $('#curr_room').text();
@@ -791,6 +793,7 @@
                         socketio.emit('create', {
                             room_name: String(room_name),
                             password: $('#room_pass').val(),
+                            explicit: explicit,
                             user: username
                         });
                         $("#close_creation").click();
@@ -968,7 +971,14 @@
                     duration: -1
                 });
 
+<<<<<<< HEAD
                 
+=======
+                socketio.on("ban_user", function(data) {
+                    console.log("Got to client side of banning user");
+                    switchRoom(data.banned_room, "Main Room");
+                });
+>>>>>>> a3278960b0291769db9daab64dd2955a1f8d644a
             });
             $('#kick_user').click(function() {
                 let other_user = $('#receiver').text();

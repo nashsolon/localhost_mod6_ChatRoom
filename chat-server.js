@@ -30,8 +30,14 @@ const io = socketio.listen(server);
 //Server side creating a new room
 
 
-let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, typing: [] } };
+let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, explicit: false, typing: [] } };
 let ids = {};
+let profanity = ["asshole", "bitch", "bloody", "bollocks", "bugger", "bullshit", "cock", "cunt", "dick", "fuck", "motherfucker", "shit"];
+// let fr = new FileReader();
+// // fr.onload=
+// let reg = /[^,]+/;
+// let profanity = [];
+// while (match = reg.exec())
 
 // "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
 
@@ -78,7 +84,7 @@ io.sockets.on("connection", function(socket) {
 
     socket.on('create', function(data) {
         // data.room_name = String(data.room_name);
-        info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, typing: [] };
+        info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, explicit: data.explicit, typing: [] };
 
         if (data.password != "") {
             // users[data.room_name].push("");
@@ -194,13 +200,28 @@ io.sockets.on("connection", function(socket) {
 
     socket.on('message_to_server', function(data) {
         console.log(data);
-
+        let m = data.message;
+        let room = data.room;
         // This callback runs when the server receives a new message from the client.
 
         // console.log("message: " + data["message"]); // log it to the Node.JS output
         // console.log(data.user);
-
-        io.in(data.room_name).emit("message_to_client", data); // broadcast the message to other users
+        if (info[room] && !info[room].explicit) {
+            // do stuff to m
+            for (let i = 0; i < profanity.length; i++) {
+                let prof = profanity[i];
+                if (m.includes(prof)) {
+                    console.log("Includes " + prof);
+                    m = m.replace(prof, prof.substring(0, 1) + "-".repeat(prof.length - 1));
+                    // m = m.replace(prof, "");
+                }
+            }
+            console.log(data);
+            console.log(m);
+            data.message = m;
+            console.log(data);
+        }
+        io.in(room).emit("message_to_client", data); // broadcast the message to other users
     });
 
     socket.on("isAdmin", function(data) {
@@ -213,13 +234,8 @@ io.sockets.on("connection", function(socket) {
     // Stanley's: {banned_users: {nash: ["12-14-21 3-28"], [-1]}}
     socket.on("ban_user", function(data) {
         info[data.room].banned_users[data.other_user] = [data.timestamp, data.duration];
-        //console.log(info[data.room]);
-        banned_user = data.other_user;
-        banned_user_id = []
-        banned_user_id.push(ids[banned_user]); //Why does ids.banned_user not work in this instance???
-        console.log("The user you want to ban has username of " + data.other_user + " and ID of " + banned_user_id);
-        console.log(banned_user_id);
-        io.in(banned_user_id).emit("ban_user", {banned_room: data.room});
+        console.log(info[data.room]);
+        //socket.emit("ban_user", {});
     });
 
     socket.on("isBanned", function(data) {
