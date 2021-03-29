@@ -837,6 +837,8 @@
             }
             //If we are the receiver, we popup the private message chat 
             else if (data.receiver == username) {
+                $('#private_header').empty();
+                $('#private_header').append('<p> Private Message </p> <p id = "receiver">' + data.sender + '</p>');
                 $(".private_chat .private_msgs").append("<p><strong>" + data.sender + ":</strong> " + data.private_message + "</p>");
                 $("#private_popup").animate({
                     right: "0px"
@@ -964,6 +966,11 @@
                     other_user: other_user,
                     timestamp: new Date().getTime(),
                     duration: -1
+                });
+
+                socketio.on("ban_user", function(data){
+                    console.log("Got to client side of banning user");
+                    switchRoom(data.banned_room, "Main Room");
                 });
             });
             $('#kick_user').click(function() {

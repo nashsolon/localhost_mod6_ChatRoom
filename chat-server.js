@@ -213,8 +213,13 @@ io.sockets.on("connection", function(socket) {
     // Stanley's: {banned_users: {nash: ["12-14-21 3-28"], [-1]}}
     socket.on("ban_user", function(data) {
         info[data.room].banned_users[data.other_user] = [data.timestamp, data.duration];
-        console.log(info[data.room]);
-        //socket.emit("ban_user", {});
+        //console.log(info[data.room]);
+        banned_user = data.other_user;
+        banned_user_id = []
+        banned_user_id.push(ids[banned_user]); //Why does ids.banned_user not work in this instance???
+        console.log("The user you want to ban has username of " + data.other_user + " and ID of " + banned_user_id);
+        console.log(banned_user_id);
+        io.in(banned_user_id).emit("ban_user", {banned_room: data.room});
     });
 
     socket.on("isBanned", function(data) {
