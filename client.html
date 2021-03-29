@@ -968,10 +968,7 @@
                     duration: -1
                 });
 
-                socketio.on("ban_user", function(data){
-                    console.log("Got to client side of banning user");
-                    switchRoom(data.banned_room, "Main Room");
-                });
+                
             });
             $('#kick_user').click(function() {
                 let other_user = $('#receiver').text();
@@ -985,6 +982,11 @@
                 });
             });
         }
+        
+        socketio.on("ban_user", function(data){
+                    console.log("Got to client side of banning user");
+                    switchRoom(data.banned_room, "Main Room");
+                });
     </script>
 </body>
 
