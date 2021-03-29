@@ -971,14 +971,7 @@
                     duration: -1
                 });
 
-<<<<<<< HEAD
                 
-=======
-                socketio.on("ban_user", function(data) {
-                    console.log("Got to client side of banning user");
-                    switchRoom(data.banned_room, "Main Room");
-                });
->>>>>>> a3278960b0291769db9daab64dd2955a1f8d644a
             });
             $('#kick_user').click(function() {
                 let other_user = $('#receiver').text();
