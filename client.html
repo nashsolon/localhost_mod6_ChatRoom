@@ -497,9 +497,9 @@
             socketio.emit('switch_room', {
                 user: username,
                 old_room: old_room,
-                room_name: room_name,
-                // pass_value: pass_value,
-                message: 'you switched rooms!'
+                room_name: room_name
+                    // pass_value: pass_value,
+                    // message: 'you switched rooms!'
             });
 
             // socketio.emit("get_rooms");
@@ -534,7 +534,10 @@
         }
 
         $('#send_btn').click(function() {
-            socketio.emit("typing_off", username);
+            socketio.emit("typing_off", {
+                user: username,
+                room: $('#curr_room').text()
+            });
             if ($("#chat_text").val() != "")
                 sendMessage();
             $("#chat_text").val("");
@@ -549,13 +552,50 @@
                 $("#send_btn").click();
             } else if ($(this).val().length > 0) {
                 console.log("typing...");
-                socketio.emit("typing", username);
+                socketio.emit("typing", {
+                    user: username,
+                    room: $('#curr_room').text()
+                });
             } else if ($(this).val().length == 0) {
-                socketio.emit("typing_off", username);
+                socketio.emit("typing_off", {
+                    user: username,
+                    room: $('#curr_room').text()
+                });
             }
         });
+
+        function checkTyping(typing_users) {
+            typing_users = typing_users.filter(item => item !== username);
+            let output = "";
+            if (typing_users.length == 0)
+                $("#typing").html("");
+            else if (typing_users.length < 4) {
+                for (let i = 0; i < typing_users.length; i++) {
+                    output += typing_users[i];
+                    if (i != typing_users.length - 1)
+                        output += ", ";
+                }
+                if (typing_users.length == 1)
+                    output += " is typing...";
+                else
+                    output += " are typing...";
+            } else if (typing_users.length > 3) {
+                output = typing_users.length + " users are typing...";
+            } else {
+                output = typing_users
+            }
+            $("#typing").html("<em>" + output + "</em>");
+        }
+
+        socketio.on("typing", function(typing_users) {
+            checkTyping(typing_users);
+        });
+
+        socketio.on("typing_off", function(typing_users) {
+            checkTyping(typing_users);
+        });
         // TYPING: check here instead (not on server side), user gets all typing msgs but doesn't show 
-        // unless there's one already right? that sounds ez
+        // if there's one already right? that sounds ez
 
 
         // LOGIN
@@ -634,15 +674,7 @@
             }, 300)
         });
 
-        socketio.on("typing", function(typing_user) {
-            console.log(typing_user + " is typing...");
-            $("#typing").html("<em>" + typing_user + " is typing...</em>");
-        });
 
-        socketio.on("typing_off", function() {
-            // console.log()
-            $("#typing").html("");
-        });
 
         socketio.on("message_to_client", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
@@ -679,12 +711,18 @@
                 return;
             $("#user_list").empty();
             let these_users = info[$('#curr_room').text()].users;
+            let admin = info[$('#curr_room').text()].admin;
             // let start = these_users[0] == "" ? 3 : 0;
             // console.log(username);
-            $("#user_list").append("<li class='user_name me'>" + username + "</li>");
+            if (admin == username)
+                $("#user_list").append("<li class='user_name me'>" + username + " (admin)</li>");
+            else
+                $("#user_list").append("<li class='user_name me'>" + username + "</li>");
             for (let i = 0; i < these_users.length; i++) {
                 let this_user = these_users[i];
-                if (this_user != username)
+                if (this_user == admin && this_user != username)
+                    $("#user_list").append("<li class='user_name'>" + this_user + " (admin)</li>");
+                else if (this_user != username)
                     $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
 
             }
@@ -708,6 +746,8 @@
             }
         });
 
+        // banned_users: {user: [timestamp, duration]}
+        // Stanley's: {banned_users: {nash: ["12-14-21 3-28"], [-1]}}
 
 
         // socketio.on("enter_password", function(data) {
@@ -821,7 +861,7 @@
 
         $("#pass_attempt").keyup(function(event) {
             if (event.keyCode === 13) {
-                console.log("uh what");
+                // console.log("uh what");
                 $("#send_attempt").click();
             }
         });
@@ -866,37 +906,49 @@
                     return;
                 }
                 next_room = room_name;
-                socketio.emit("isAdmin", {
+
+                socketio.emit("isBanned", {
                     user: username,
                     room: room_name
                 });
-                socketio.on("isAdmin", function(data) {
-                    console.log(username + " is the admin? " + data.is_admin);
-                    console.log(data);
-                    // console.log("Has a password? " + $(this).hasClass("pass"));
-                    let has_pass = data.info.password;
-                    // console.log(room_name)
-                    if (data.is_admin) {
-                        $('#ban_user').html('Ban User');
-                        $('#kick_user').html('Kick User');
-                        refresh_admin(data.room_name);
+                socketio.on("isBanned", function(stuff) {
+                    if (stuff.banned) {
+                        console.log("sorry, banned");
+                        return;
                     }
-                    if (has_pass && !data.is_admin) {
-                        // let pass_value = false;
-                        console.log("There's a password");
-                        // FIRST get the password
-                        // check do we have it
-                        // then ->
-                        // bring up send_attempt stuff
-                        $("#pass_popup").animate({
-                            left: "0"
-                        }, 300);
+                    socketio.emit("isAdmin", {
+                        user: username,
+                        room: room_name
+                    });
+                    socketio.on("isAdmin", function(data) {
+                        console.log(username + " is the admin? " + data.is_admin);
+                        console.log(data);
+                        // console.log("Has a password? " + $(this).hasClass("pass"));
+                        let has_pass = data.info.password;
+                        // console.log(room_name)
+                        if (data.is_admin) {
+                            $('#ban_user').html('Ban User');
+                            $('#kick_user').html('Kick User');
+                            refresh_admin(data.room_name);
+                        }
+                        if (has_pass && !data.is_admin) {
+                            // let pass_value = false;
+                            console.log("There's a password");
+                            // FIRST get the password
+                            // check do we have it
+                            // then ->
+                            // bring up send_attempt stuff
+                            $("#pass_popup").animate({
+                                left: "0"
+                            }, 300);
 
-                    } else {
-                        // console.log("WHATOIJAE: OIJE:OGI JEWOG JQI#OGN")
-                        switchRoom(old_room, room_name);
-                    }
+                        } else {
+                            // console.log("WHATOIJAE: OIJE:OGI JEWOG JQI#OGN")
+                            switchRoom(old_room, room_name);
+                        }
+                    });
                 });
+
             });
         }
 
@@ -905,16 +957,25 @@
             $("#kick_user").off("click");
             $('#ban_user').click(function() {
                 let other_user = $('#receiver').text();
-                console.log('You are the admin and the other user you want to ban is ' + other_user + 'from the room' + room_name);
+                console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
                 socketio.emit("ban_user", {
                     user: username,
                     room: room_name,
-                    other_user: other_user
+                    other_user: other_user,
+                    timestamp: new Date().getTime(),
+                    duration: -1
                 });
-
             });
             $('#kick_user').click(function() {
-
+                let other_user = $('#receiver').text();
+                console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
+                socketio.emit("ban_user", {
+                    user: username,
+                    room: room_name,
+                    other_user: other_user,
+                    timestamp: new Date().getTime(),
+                    duration: 10000
+                });
             });
         }
     </script>

@@ -30,7 +30,7 @@ const io = socketio.listen(server);
 //Server side creating a new room
 
 
-let info = { "Main Room": { password: null, admin: null, users: [], banned_users: [] } };
+let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, typing: [] } };
 let ids = {};
 
 // "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
@@ -61,6 +61,10 @@ io.sockets.on("connection", function(socket) {
             if (info[socket.curr_room]) {
                 info[socket.curr_room].users = info[socket.curr_room].users.filter(item => item !== socket.this_user)
             }
+            if (info[socket.curr_room].typing.includes(socket.this_user)) {
+                info[socket.curr_room].typing = info[socket.curr_room].typing.filter(item => item !== socket.this_user);
+                io.in(socket.curr_room).emit('typing_off', info[socket.curr_room].typing);
+            }
             console.log(info);
             console.log(socket.this_user + " disconnected");
             io.sockets.emit("update_users", info);
@@ -74,7 +78,7 @@ io.sockets.on("connection", function(socket) {
 
     socket.on('create', function(data) {
         // data.room_name = String(data.room_name);
-        info[data.room_name] = { password: null, admin: null, users: [], banned_users: [] };
+        info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, typing: [] };
 
         if (data.password != "") {
             // users[data.room_name].push("");
@@ -132,13 +136,29 @@ io.sockets.on("connection", function(socket) {
         io.sockets.emit("get_users", info);
     });
 
-    typing = "";
+    // typing = "";
 
-    socket.on('typing', function(username) {
-        if (typing == "") {
-            typing = username;
-            socket.broadcast.emit('typing', username);
+    socket.on('typing', function(data) {
+        let room = data.room;
+        let user = data.user;
+        if (!info[room].typing.includes(user)) {
+            info[room].typing.push(user);
+            io.in(room).emit("typing", info[room].typing);
+            console.log(user + "'s typing...");
+            console.log(info[room].typing);
         }
+    });
+
+    socket.on('typing_off', function(data) {
+        // if (username == typing) {
+        //     typing = "";
+        let room = data.room;
+        info[room].typing = info[room].typing.filter(item => item !== data.user);
+
+        io.in(room).emit('typing_off', info[room].typing);
+        console.log(data.user + "'s no longer typing");
+        console.log(info[room].typing);
+        // }
     });
 
     socket.on('private_message', function(data) {
@@ -151,20 +171,12 @@ io.sockets.on("connection", function(socket) {
 
         console.log("the id of the receiver is " + id_receiver);
     });
-
-    socket.on('typing_off', function(username) {
-        if (username == typing) {
-            typing = "";
-            socket.broadcast.emit('typing_off');
-        }
-    });
-
     socket.on("pass_attempt", function(data) {
         // .pass, .room
         // console.log("Pass: " + data.pass + ", Room: " + data.room);
         // console.log("Pass is " + data.pass);
         console.log(data);
-        if (info[data.next_room].password) {
+        if (info[data.next_room] && info[data.next_room].password) {
             let real_pass = info[data.next_room].password;
             let correct = real_pass == data.pass;
             console.log(correct);
@@ -195,16 +207,38 @@ io.sockets.on("connection", function(socket) {
         // console.log("Is " + data.user + " the admin???????");
         let thing = data.user == info[data.room].admin;
         // console.log(thing + ": He is " + data.user + ", admin is " + info[data.room].admin);
-        socket.emit("isAdmin", {room_name: data.room, is_admin: thing, info: info[data.room] });
+        socket.emit("isAdmin", { room_name: data.room, is_admin: thing, info: info[data.room] });
     });
 
+    // Stanley's: {banned_users: {nash: ["12-14-21 3-28"], [-1]}}
     socket.on("ban_user", function(data) {
-        info[data.room].banned_users.push(data.other_user);
+        info[data.room].banned_users[data.other_user] = [data.timestamp, data.duration];
         console.log(info[data.room]);
         //socket.emit("ban_user", {});
     });
 
-});
-// io.sockets.on("disconnect", function() {
+    socket.on("isBanned", function(data) {
+        // data.user, data.room
+        let banned = false;
+        if (data.user in info[data.room].banned_users) {
+            let curr_time = new Date().getTime();
+            let dur = info[data.room].banned_users[data.user][1];
+            let timestamp = info[data.room].banned_users[data.user][0]
+            if (dur == -1) {
+                console.log(data.user + " is permanently banned from " + data.room);
+                banned = true;
+            } else {
+                let diff = curr_time - timestamp;
+                if (diff > dur) {
+                    console.log(data.user + " is no longer banned from " + data.room);
+                    delete info[data.room].banned_users[data.user];
+                } else {
+                    console.log(data.user + " is still banned for " + (dur - diff) + " more millisecs");
+                    banned = true;
+                }
+            }
+        }
+        socket.emit("isBanned", { banned: banned })
+    });
 
-// });
+});
