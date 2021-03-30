@@ -635,6 +635,8 @@
         });
 
 
+        //We need to set the value of username here becuase we are using ansyncronous functions
+        // We use username in serveral places throughout our code
         function loginUser(user_name) {
             username = user_name;
         }
@@ -787,6 +789,8 @@
             }
         });
 
+        //This is where we refresh users. This allows us to click on the usernames and then pull up the private messaging popup
+        //If we are the admin, this is checked when we switch into the room
         function refresh_users() {
             $('.user_name').click(function() {
 
@@ -895,7 +899,7 @@
                     }, 300)
                     switchRoom(old_room, data.next_room);
                     next_room = "";
-                    
+
                 //Or the password is wrong and we fade in the incorrect pass
                 } else {
                     console.log("Wrong Password");
@@ -905,20 +909,25 @@
             });
         });
 
+
         let next_room = "";
 
+        //This is our refresh function, to determine if a user is banned and also to add event listeners to each roomname
         function refresh() {
             $(".room_name").off("click");
             $('.room_name').click(function() {
-                // console.log("clicked on room name");
+                
+
                 let old_room = $('#curr_room').text();
                 let room_name = $(this).text();
                 console.log("WE JUST CLICKED ON " + room_name);
+                //If we click on the same roomname, we do nothing
                 if (old_room == room_name) {
                     return;
                 }
                 next_room = room_name;
 
+                //If the user is banned from the room that they clicked, then they are not allowed in
                 socketio.emit("isBanned", {
                     user: username,
                     room: next_room
@@ -930,33 +939,35 @@
                         $('#banned').fadeOut(1000);
                         return;
                     }
+
+                    //If the user is the admin, then they are granted admin powers through Ban User and Kick User
                     socketio.emit("isAdmin", {
                         user: username,
                         room: next_room
                     });
                     socketio.once("isAdmin", function(data) {
                         console.log(username + " is the admin? " + data.is_admin);
-                        // console.log(data);
-                        // console.log("Has a password? " + $(this).hasClass("pass"));
+                        
+
                         let has_pass = data.info.password;
-                        // console.log(room_name)
+                       
                          if (data.is_admin) {
                             $('#ban_user').html('Ban User');
                             $('#kick_user').html('Kick User');
-                        //     // refresh_admin(data.room_name);
+                        
                         }
+                        //If our user is not the admin, and the room has a password, then we animate password popup
+                        // and the user has to input the password
                         if (has_pass && !data.is_admin) {
-                            // let pass_value = false;
+                            
                             console.log("Yes, there's a password in room: " + data.room_name);
-                            // FIRST get the password
-                            // check do we have it
-                            // then ->
-                            // bring up send_attempt stuff
+                            
                             $("#pass_popup").animate({
                                 left: "0"
                             }, 300);
-
+                        //If the user is the admin or there is not password, then we just switch the user to the room
                         } else {
+                            
                             // console.log("WHATOIJAE: OIJE:OGI JEWOG JQI#OGN")
                             switchRoom(old_room, room_name);
                         }
@@ -966,10 +977,15 @@
             });
         }
 
+        //If the admin clicks on ban_user, then we ban the user in this function
         $('#ban_user').click(function() {
+            //The other user is the receiver of our "private message". We can do this becasue the ban user button is only
+            // available when we click on a username
             let other_user = $('#receiver').text();
             let room_name = $('#curr_room').text();
             console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
+            //We emit the ban users to the server side
+            //We send the duration as -1 to ensure that the user as always banned
             socketio.emit("ban_user", {
                 user: username,
                 room: room_name,
@@ -980,10 +996,13 @@
 
 
         });
+        //Here is where we kick the user for a temporary amount of time
         $('#kick_user').click(function() {
             let other_user = $('#receiver').text();
             let room_name = $('#curr_room').text();
+            
             console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
+            //We then emit the information, which includes a time stamp and the duration which is 10,000 ms or 10 seconds
             socketio.emit("ban_user", {
                 user: username,
                 room: room_name,
@@ -994,11 +1013,13 @@
         });
 
 
+        //If the user is banned and is currently in that room, then we switch the user into the main room
         socketio.on("ban_user", function(data) {
             console.log("Got to client side of banning user");
             switchRoom(data.banned_room, "Main Room");
         });
 
+        //Whhen we load the document, we hide the popups that tell us about invalid usernames, banned status, etc.
         $(document).ready(function() {
             $('#incorrect_pass').hide();
             $('#username_taken').hide();
