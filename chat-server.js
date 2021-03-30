@@ -115,7 +115,6 @@ io.sockets.on("connection", function(socket) {
             info[data.room_name].users.push(us);
             socket.curr_room = data.room_name;
         }
-        // console.log(info);
         io.sockets.emit("get_users", info);
     });
 
@@ -232,5 +231,4 @@ io.sockets.on("connection", function(socket) {
         }
         socket.emit("isBanned", { banned: banned })
     });
-
 });
