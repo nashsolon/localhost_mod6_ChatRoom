@@ -35,4 +35,8 @@ Full parts:
     - When more than three users are typing the other users see the number of users that are typing
 - Censoring content
     - Upon creating a room, the creator can determine whether or not they want their room to be censored
-    - If they are censored, we have a list of  
+    - If the room is censored, we chose a selection of words considered profane by the youtube banned words list and, if a user were to type one of these words, the       word would be censored with dashes. ex hello => h----
+    - 
+- Temporariliy kick a user from a room for a select duration of time
+    - Here, the admin can kick a user from the room. However, the admin can select a certain amount of time they would like the user to be kicked for.
+    - Admin can select from a drop down menu to select how long to kick for.
