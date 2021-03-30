@@ -233,7 +233,7 @@ io.sockets.on("connection", function(socket) {
     });
 
     socket.on("isAdmin", function(data) {
-        // console.log("Is " + data.user + " the admin???????");
+        console.log("Is " + data.user + " the admin???????");
         let thing = data.user == info[data.room].admin;
         // console.log(thing + ": He is " + data.user + ", admin is " + info[data.room].admin);
         socket.emit("isAdmin", { room_name: data.room, is_admin: thing, info: info[data.room] });

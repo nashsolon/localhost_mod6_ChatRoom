@@ -357,6 +357,10 @@
         #explicit_label {
             font-size: 15pt;
         }
+        
+        #incorrect_pass {
+            font-size: 15pt;
+        }
     </style>
 
 </head>
@@ -413,7 +417,7 @@
 
         <input type="text" id="pass_attempt" placeholder='Enter Password' />
 
-        <p class='btn' id='send_attempt'>&#x279C;</p> <br>
+        <p class='btn' id='send_attempt'>&#x279C;</p> <br><br>
 
         <div id='incorrect_pass'>Incorrect Password</div>
 
@@ -551,8 +555,7 @@
             socketio.emit("message_to_server", {
                 room: room_name,
                 message: msg,
-                user: username,
-                room: room_name
+                user: username
             });
         }
 
@@ -626,7 +629,7 @@
 
 
             socketio.emit("get_users");
-            socketio.on("get_users", function(info) {
+            socketio.once("get_users", function(info) {
                 users = info[$('#curr_room').text()].users;
                 // console.log(users);
                 let login = !users.includes($("#user").val());
@@ -731,7 +734,7 @@
         // {"Secret Room": ["", "password", "admin:nash", "sasha", "max", ...]}
 
         socketio.on("get_users", function(info) {
-            console.log(info);
+            // console.log(info);
             if (username == "")
                 return;
             $("#user_list").empty();
@@ -800,28 +803,19 @@
         // })
 
         $("#create_room").click(function() {
-            // let explicit = $('input[name="explicit"]:checked').val();
             let explicit = $("#explicit_on:checked").length > 0;
-            // if (explicit == null) {
-            //     return;
-            // }
             console.log("Room explicit: " + explicit);
-            // if (explicit == 'exp_on') {
-            //     explicit_val = true;
-            // } else {
-            //     explicit_val = false;
-            // }
             let room_name = $('#new_room_name').val();
-            // let explicit = $('#room_explicit').checked();
 
             if (room_name != "") {
 
                 let old_room = $('#curr_room').text();
                 $('#ban_user').html('Ban User');
                 $('#kick_user').html('Kick User');
-                refresh_admin(room_name);
+                // refresh_admin(room_name);
                 socketio.emit("get_rooms");
-                socketio.on("get_rooms", function(all_rooms) {
+                socketio.once("get_rooms", function(all_rooms) {
+                    console.log(all_rooms)
                     if (!all_rooms.includes(room_name)) {
                         // all_rooms;
                         // let the_pass = $('#room_pass').val();
@@ -928,15 +922,15 @@
                 pass: pass_attempt,
                 next_room: next_room
             });
-            socketio.on("pass_attempt", function(data) {
+            socketio.once("pass_attempt", function(data) {
                 // console.log("Got back a " + correct + " from the server");
                 if (data.correct) {
                     console.log("Correct Password")
                     console.log("Password was correct and we will now switch to: " + data.next_room)
-                    switchRoom(old_room, data.next_room);
                     $("#pass_popup").animate({
                         left: "-500px"
                     }, 300)
+                    switchRoom(old_room, data.next_room);
                     next_room = "";
                 } else {
                     console.log("Wrong Password");
@@ -948,15 +942,13 @@
 
         let next_room = "";
 
-
-
-        // ALSO RESET IF GET OUT OF PASS ATTEMPT
         function refresh() {
             $(".room_name").off("click");
             $('.room_name').click(function() {
                 // console.log("clicked on room name");
                 let old_room = $('#curr_room').text();
                 let room_name = $(this).text();
+                console.log("WE JUST CLICKED ON " + room_name);
                 if (old_room == room_name) {
                     return;
                 }
@@ -964,31 +956,31 @@
 
                 socketio.emit("isBanned", {
                     user: username,
-                    room: room_name
+                    room: next_room
                 });
-                socketio.on("isBanned", function(stuff) {
+                socketio.once("isBanned", function(stuff) {
                     if (stuff.banned) {
                         console.log("sorry, banned");
                         return;
                     }
                     socketio.emit("isAdmin", {
                         user: username,
-                        room: room_name
+                        room: next_room
                     });
-                    socketio.on("isAdmin", function(data) {
+                    socketio.once("isAdmin", function(data) {
                         console.log(username + " is the admin? " + data.is_admin);
-                        console.log(data);
+                        // console.log(data);
                         // console.log("Has a password? " + $(this).hasClass("pass"));
                         let has_pass = data.info.password;
                         // console.log(room_name)
-                        if (data.is_admin) {
-                            $('#ban_user').html('Ban User');
-                            $('#kick_user').html('Kick User');
-                            refresh_admin(data.room_name);
-                        }
+                        // if (data.is_admin) {
+                        //     // $('#ban_user').html('Ban User');
+                        //     // $('#kick_user').html('Kick User');
+                        //     // refresh_admin(data.room_name);
+                        // }
                         if (has_pass && !data.is_admin) {
                             // let pass_value = false;
-                            console.log("There's a password");
+                            console.log("Yes, there's a password in room: " + data.room_name);
                             // FIRST get the password
                             // check do we have it
                             // then ->
@@ -1007,34 +999,31 @@
             });
         }
 
-        function refresh_admin(room_name) {
-            $("#ban_user").off("click");
-            $("#kick_user").off("click");
-            $('#ban_user').click(function() {
-                let other_user = $('#receiver').text();
-                console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
-                socketio.emit("ban_user", {
-                    user: username,
-                    room: room_name,
-                    other_user: other_user,
-                    timestamp: new Date().getTime(),
-                    duration: -1
-                });
+        $('#ban_user').click(function() {
+            let other_user = $('#receiver').text();
+            console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
+            socketio.emit("ban_user", {
+                user: username,
+                room: room_name,
+                other_user: other_user,
+                timestamp: new Date().getTime(),
+                duration: -1
+            });
 
 
+        });
+        $('#kick_user').click(function() {
+            let other_user = $('#receiver').text();
+            console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
+            socketio.emit("ban_user", {
+                user: username,
+                room: room_name,
+                other_user: other_user,
+                timestamp: new Date().getTime(),
+                duration: 10000
             });
-            $('#kick_user').click(function() {
-                let other_user = $('#receiver').text();
-                console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
-                socketio.emit("ban_user", {
-                    user: username,
-                    room: room_name,
-                    other_user: other_user,
-                    timestamp: new Date().getTime(),
-                    duration: 10000
-                });
-            });
-        }
+        });
+
 
         socketio.on("ban_user", function(data) {
             console.log("Got to client side of banning user");
