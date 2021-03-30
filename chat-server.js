@@ -5,13 +5,12 @@ mine = require("mime");
 
 const port = 3456;
 const file = "client.html";
+
 // Listen for HTTP connections.  This is essentially a miniature static file server that only serves our one file, client.html, on port 3456:
 const server = http.createServer(function(req, res) {
     // This callback runs when a new connection is made to our HTTP server.
-
     fs.readFile(file, function(err, data) {
         // This callback runs when the client.html file has been read from the filesystem.
-
         if (err) return res.writeHead(500);
         res.writeHead(200);
         res.end(data);
@@ -27,21 +26,22 @@ const socketio = require("socket.io")(server, {
 // Attach our Socket.IO server to our HTTP server to listen
 const io = socketio.listen(server);
 
-//Server side creating a new room
-
-
+// The 'info' object stores most of the information about our rooms. It contains a sub-object for each room which contains
+// the password and admin if applicable, the users inside, the banned users, whether or not it is an explicit room, and
+// who in the room is currently typing. We start off with just the "Main Room"
 let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, explicit: false, typing: [] } };
+
+// The 'ids' object is for private messaging
 let ids = {};
 
+// This is a list of the profane language not allowed in our non-explicit rooms. When a message is sent, these words are filtered
+// out. These terms were selected from the list of YouTube blacklisted words
 let profanity = ["asshole", "bitch", "bloody", "bollocks", "bugger", "bullshit", "pussy", "cock", "cunt", "dick", "fuck", "motherfucker", "shit"];
 
-// "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
-
+// This will run when a new user connects to the server
 io.sockets.on("connection", function(socket) {
-    console.log("Connected!");
-    // let this_user = "";
-    // let curr_room = "";
 
+    // This will run if a user successfully logs into the server
     socket.on('join_server', function(data) {
         socket.join(data.room);
         console.log(data.user + " connected");
