@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang = 'en'>
 
 <head>
+    <title> Nash/Sasha Chat Room </title>
     <link href="chat_room.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quicksand">
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script type="text/javascript">
+    <script>
         var socketio = io.connect();
     </script>
     <style>
@@ -138,7 +139,7 @@
             text-align: left;
             padding: 20px;
             -ms-overflow-style: none;
-            scrollbar-width: none;
+            
         }
         
          ::-webkit-scrollbar {
@@ -484,7 +485,8 @@
     <script>
         let username = "";
 
-        function escapeHtml(unsafe) {
+        //Escapehtml used here to escape our output
+        function escapehtml(unsafe) {
             return unsafe
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
@@ -697,9 +699,9 @@
             //Append an HR thematic break and the escaped HTML of the new message
             // console.log("Received message");
             if (data.user == username)
-                $(".chat .msgs").append("<p><strong class='me'>" + data.user + ":</strong> " + data.message + "</p>");
+                $(".chat .msgs").append("<p><strong class='me'>" + escapehtml(data.user) + ":</strong> " + escapehtml(data.message) + "</p>");
             else
-                $(".chat .msgs").append("<p><strong>" + data.user + ":</strong> " + data.message + "</p>");
+                $(".chat .msgs").append("<p><strong>" + escapehtml(data.user) + ":</strong> " + escapehtml(data.message) + "</p>");
         });
 
         //Getting and printing out the list of users from our server side
@@ -713,15 +715,15 @@
 
             //Cases for when a user is themselves or an admin
             if (admin == username)
-                $("#user_list").append("<li class='user_name me'>" + username + " (admin)</li>");
+                $("#user_list").append("<li class='user_name me'>" + escapehtml(username) + " (admin)</li>");
             else
-                $("#user_list").append("<li class='user_name me'>" + username + "</li>");
+                $("#user_list").append("<li class='user_name me'>" + escapehtml(username) + "</li>");
             for (let i = 0; i < these_users.length; i++) {
                 let this_user = these_users[i];
                 if (this_user == admin && this_user != username)
-                    $("#user_list").append("<li class='user_name'>" + this_user + " (admin)</li>");
+                    $("#user_list").append("<li class='user_name'>" + escapehtml(this_user) + " (admin)</li>");
                 else if (this_user != username)
-                    $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
+                    $("#user_list").append("<li class='user_name'>" + escapehtml(this_user) + "</li>");
 
             }
             //Refresh users allows admin functionality and also event listeners to connect to usernames
@@ -735,13 +737,13 @@
                 let this_room = all_rooms[i];
                 let pass = info[this_room].password;
                 if (this_room == $("#curr_room").text() && pass)
-                    $("#room_list").append("<li class='room_name curr pass' >" + this_room + "</li>");
+                    $("#room_list").append("<li class='room_name curr pass' >" + escapehtml(this_room) + "</li>");
                 else if (this_room == $("#curr_room").text() && !pass)
-                    $("#room_list").append("<li class='room_name curr' >" + this_room + "</li>");
+                    $("#room_list").append("<li class='room_name curr' >" + escapehtml(this_room) + "</li>");
                 else if (pass)
-                    $('#room_list').append("<li class='room_name pass' >" + this_room + "</li>");
+                    $('#room_list').append("<li class='room_name pass' >" + escapehtml(this_room) + "</li>");
                 else
-                    $('#room_list').append("<li class='room_name' >" + this_room + "</li>");
+                    $('#room_list').append("<li class='room_name' >" + escapehtml(this_room)+ "</li>");
                 refresh();
             }
         });
@@ -804,7 +806,7 @@
                     right: "0"
                 }, 300);
                 $('#private_header').empty();
-                $('#private_header').append('<p> Private Message </p> <p id = "receiver">' + $(this).text() + '</p>');
+                $('#private_header').append('<p> Private Message </p> <p id = "receiver">' + escapehtml($(this).text()) + '</p>');
 
             });
         }
@@ -841,14 +843,14 @@
             if (data.sender == username) {
                 console.log("The receiver is " + data.receiver);
                 console.log("The sender is " + data.sender);
-                $(".private_chat .private_msgs").append("<p><strong class='me'>" + data.sender + ":</strong> " + data.private_message + "</p>");
+                $(".private_chat .private_msgs").append("<p><strong class='me'>" + data.sender + ":</strong> " + escapehtml(data.private_message) + "</p>");
             }
 
             //If we are the receiver, we popup the private message chat 
             else if (data.receiver == username) {
                 $('#private_header').empty();
                 $('#private_header').append('<p> Private Message </p> <p id = "receiver">' + data.sender + '</p>');
-                $(".private_chat .private_msgs").append("<p><strong>" + data.sender + ":</strong> " + data.private_message + "</p>");
+                $(".private_chat .private_msgs").append("<p><strong>" + data.sender + ":</strong> " + escapehtml(data.private_message) + "</p>");
                 $("#private_popup").animate({
                     right: "0px"
                 }, 300)
