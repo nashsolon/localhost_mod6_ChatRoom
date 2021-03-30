@@ -390,6 +390,8 @@
             <ul id='room_list'>
                 <!-- <li class='room_name curr'>Main Room</li> -->
             </ul>
+
+            <div id = 'banned'>Permission Denied</div>
         </div>
     </div>
     <div id='create_popup'>
@@ -493,56 +495,23 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
-        // socketio.on("new_user", function(users) {
-        //     user_array = users['users'];
-        //     for (user in user_array) {
-        //         // $('#user_list').append("<li class='user_name' >" + user +  "</li>");
-        //     }
-
-        // });
-
-
-        // $("document").on('click', '.room_name', function() {
-        // console.log("clicked on room name");
-        // let room_name = $(this).text();
-        // let old_room = $('#curr_room').text();
-        // $('#curr_room').text(room_name);
-
-        // $(".chat").empty();
-        // switchRoom(old_room, room_name);
-        // })
-
-
-
+  
+        //Function to switch rooms. We call this function in multiple places throughout our client side
         function switchRoom(old_room, room_name) {
 
-            // console.log("when switching rooms, the room name is now" + room_name)
+            //Get the current room we are in and also empty the chat log for the user
             $('#curr_room').text(room_name);
             $(".chat .msgs").empty();
-            // console.log("You want to switch to: " + room_name);
+            
+            //Emit to our server side so that we can switch rooms
             socketio.emit('switch_room', {
                 user: username,
                 old_room: old_room,
                 room_name: room_name
-                    // pass_value: pass_value,
-                    // message: 'you switched rooms!'
+       
             });
 
-            // socketio.emit("get_rooms");
-            // socketio.on("get_rooms", function(all_rooms) {
-            //     $(".room_list").empty();
-            //     for (let i = 0; i < all_rooms.length; i++) {
-            //         let this_room = all_rooms[i];
-            //         if (pass != "") {
-            //             $('#room_list').append("<li class='room_name pass' >" + room_name + "</li>");
-            //         } else
-            //             $('#room_list').append("<li class='room_name' >" + room_name + "</li>");
-            //         refresh();
-            //     }
-            // })
-
-
-            //Do not add room name yet. Added afterwards so all users can see it
+   
 
         }
 
@@ -552,6 +521,7 @@
             let msg = $("#chat_text").val();
             // console.log(msg);
 
+            //Emit message, roomname, and username to the server
             socketio.emit("message_to_server", {
                 room: room_name,
                 message: msg,
@@ -559,6 +529,7 @@
             });
         }
 
+        //Listener for when we are sending a message
         $('#send_btn').click(function() {
             socketio.emit("typing_off", {
                 user: username,
@@ -573,6 +544,7 @@
                 scrollTop: sh
             }, 500);
         })
+
         $("#chat_text").keyup(function(event) {
             if (event.keyCode === 13) {
                 $("#send_btn").click();
@@ -624,19 +596,22 @@
         // if there's one already right? that sounds ez
 
 
-        // LOGIN
+        // Listener for when we are logging into our chat room
         $("#login_btn").click(function() {
 
-
+            //Emit get users to our server
             socketio.emit("get_users");
+            //On get users, we check id the user is in the array already
+            //If not, we allow the user to login
             socketio.once("get_users", function(info) {
                 users = info[$('#curr_room').text()].users;
-                // console.log(users);
+               
                 let login = !users.includes($("#user").val());
                 login = $("#user").val() == "" ? false : login;
-                // console.log(login);
+                
                 if (login) {
-                    // console.log("Login " + $("#user").val());
+                    
+                    //This joins the user to the main room
                     socketio.emit("join_server", {
                         user: $("#user").val(),
                         room: $('#curr_room').text()
@@ -651,28 +626,34 @@
                 }
             });
         })
+
+        //Alows user to press enter for login screen
         $("#user").keyup(function(event) {
             if (event.keyCode === 13) {
                 $("#login_btn").click();
             }
         });
 
+
         function loginUser(user_name) {
             username = user_name;
         }
 
+        //This is our animation for the user menu
         $("#user_menu").click(function() {
             $(".room-users").animate({
                 right: "0"
             }, 300);
         });
 
+        //Animation to close user menu
         $("#close_users").click(function() {
             $(".room-users").animate({
                 right: "-500px"
             }, 300)
         });
 
+        //Close private message popup
         $("#close_private").click(function() {
             $("#private_popup").animate({
                 right: "-500px"
@@ -681,6 +662,7 @@
 
         });
 
+        //Animation to create a room
         $("#add_room").click(function() {
             $("#room_pass").val("");
             $("#create_popup").animate({
@@ -689,6 +671,7 @@
         });
 
 
+        //Close create a room
         $("#close_creation").click(function() {
             $("#new_room_name").val("");
             $("#create_popup").animate({
@@ -696,6 +679,7 @@
             }, 300)
         });
 
+        //Close the password popup
         $("#close_pass").click(function() {
             // $("#pass_attempt").val("");
             $("#pass_popup").animate({
@@ -705,6 +689,7 @@
 
 
 
+        //When we receiver a message from the server, we append the message to the chat 
         socketio.on("message_to_client", function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             // console.log("Received message");
@@ -714,26 +699,7 @@
                 $(".chat .msgs").append("<p><strong>" + data.user + ":</strong> " + data.message + "</p>");
         });
 
-        // socketio.on("create_room", function(data) {
-        //     //Append an HR thematic break and the escaped HTML of the new message
-        //     $("#chatlog").empty();
-
-        // });
-
-        // socketio.on("add_to_roomlist", function(data) {
-        //     //Append an HR thematic break and the escaped HTML of the new message
-        //     let room_name = data['room_name'];
-        //     let pass = data.password;
-        //     if (pass != "") {
-        //         $('#room_list').append("<li class='room_name pass' >" + room_name + "</li>");
-        //     } else
-        //         $('#room_list').append("<li class='room_name' >" + room_name + "</li>");
-        //     refresh();
-        // });
-
-
-        // {"Secret Room": ["", "password", "admin:nash", "sasha", "max", ...]}
-
+        //Getting and printing out the list of users from our server side
         socketio.on("get_users", function(info) {
             // console.log(info);
             if (username == "")
@@ -741,8 +707,8 @@
             $("#user_list").empty();
             let these_users = info[$('#curr_room').text()].users;
             let admin = info[$('#curr_room').text()].admin;
-            // let start = these_users[0] == "" ? 3 : 0;
-            // console.log(username);
+            
+            //Cases for when a user is themselves or an admin
             if (admin == username)
                 $("#user_list").append("<li class='user_name me'>" + username + " (admin)</li>");
             else
@@ -755,8 +721,10 @@
                     $("#user_list").append("<li class='user_name'>" + this_user + "</li>");
 
             }
+            //Refresh users allows admin functionality and also event listeners to connect to usernames
             refresh_users();
 
+            //Empties and updates that room list
             $("#room_list").empty();
             let all_rooms = Object.keys(info);
             // console.log(all_rooms);
@@ -775,45 +743,24 @@
             }
         });
 
-        // banned_users: {user: [timestamp, duration]}
-        // Stanley's: {banned_users: {nash: ["12-14-21 3-28"], [-1]}}
-
-
-        // socketio.on("enter_password", function(data) {
-
-        // });
-
-        // function createRoom() {
-        //     let room_name = $('#new_room_name').val();
-        //     console.log(room_name);
-        //     // $('#chat_header').empty();
-        //     // $('#chat_header').append("<h1 id = 'chat_title_display'>" + room_name + "</h1>");
-        //     //Do not add room name yet. Added afterwards so all users can see it
-
-        //     socketio.emit('create', {
-        //         room_name: room_name,
-        //         message: 'you created a new room!'
-        //     });
-
-        // }
-
-
-
-        // $("#send_message").click(function() {
-        //     sendMessage();
-        // })
-
+       
+        //Allows a user to create a room but clicking on add button in top left hand side
         $("#create_room").click(function() {
+            //Part of creative, checks if user wants explicit content or not
             let explicit = $("#explicit_on:checked").length > 0;
             console.log("Room explicit: " + explicit);
             let room_name = $('#new_room_name').val();
 
+            //No empty roomname
             if (room_name != "") {
 
+
                 let old_room = $('#curr_room').text();
+                //Creator of the room is admin. So they can see ban and kick user
                 $('#ban_user').html('Ban User');
                 $('#kick_user').html('Kick User');
-                // refresh_admin(room_name);
+                
+
                 socketio.emit("get_rooms");
                 socketio.once("get_rooms", function(all_rooms) {
                     console.log(all_rooms)
@@ -828,6 +775,7 @@
                             user: username
                         });
                         $("#close_creation").click();
+                        //Switch the creator of the room into their newly creted room
                         switchRoom(old_room, room_name);
                     } else {
                         console.log("Room name taken");
@@ -856,11 +804,15 @@
             });
         }
 
+
+        //Allows user to send a private message
         $('#send_private').click(function() {
+
             //If we want to send a private message, we send info to the server
             let receiver = $('#receiver').text();
             let msg = $('#private_message').val();
             $('#private_message').val("");
+            //Emit the sender, receiver, and the message
             socketio.emit("private_message", {
                 sender: username,
                 receiver: receiver,
@@ -868,6 +820,8 @@
             });
 
         });
+
+        //Allows user to use enter key to send a private message
         $("#private_message").keyup(function(event) {
             if (event.keyCode === 13) {
                 // console.log("uh what");
@@ -884,6 +838,7 @@
                 console.log("The sender is " + data.sender);
                 $(".private_chat .private_msgs").append("<p><strong class='me'>" + data.sender + ":</strong> " + data.private_message + "</p>");
             }
+
             //If we are the receiver, we popup the private message chat 
             else if (data.receiver == username) {
                 $('#private_header').empty();
@@ -897,19 +852,20 @@
         });
 
 
-
+        //Allows user to use enter key to create a room 
         $("#new_room_name").keyup(function(event) {
             if (event.keyCode === 13) {
                 $("#create_room").click();
             }
         });
+        //Allows user to use enter key to create a room 
         $("#room_pass").keyup(function(event) {
             if (event.keyCode === 13) {
                 $("#create_room").click();
             }
         })
 
-
+        //Allows user to use enter key to submit a password attemp
         $("#pass_attempt").keyup(function(event) {
             if (event.keyCode === 13) {
                 // console.log("uh what");
@@ -917,6 +873,7 @@
             }
         });
 
+        //On the password attemp, we send info to the server
         $("#send_attempt").click(function() {
             let pass_attempt = $("#pass_attempt").val();
             console.log("It's " + next_room);
@@ -926,8 +883,10 @@
                 pass: pass_attempt,
                 next_room: next_room
             });
+            //Once the server determines whether or not our password is correct...
             socketio.once("pass_attempt", function(data) {
-                // console.log("Got back a " + correct + " from the server");
+                
+                //Either correct and we switch to that room...
                 if (data.correct) {
                     console.log("Correct Password")
                     console.log("Password was correct and we will now switch to: " + data.next_room)
@@ -936,6 +895,8 @@
                     }, 300)
                     switchRoom(old_room, data.next_room);
                     next_room = "";
+                    
+                //Or the password is wrong and we fade in the incorrect pass
                 } else {
                     console.log("Wrong Password");
                     $('#incorrect_pass').show();
@@ -965,6 +926,8 @@
                 socketio.once("isBanned", function(stuff) {
                     if (stuff.banned) {
                         console.log("sorry, banned");
+                        $('#banned').show();
+                        $('#banned').fadeOut(1000);
                         return;
                     }
                     socketio.emit("isAdmin", {
@@ -977,11 +940,11 @@
                         // console.log("Has a password? " + $(this).hasClass("pass"));
                         let has_pass = data.info.password;
                         // console.log(room_name)
-                        // if (data.is_admin) {
-                        //     // $('#ban_user').html('Ban User');
-                        //     // $('#kick_user').html('Kick User');
+                         if (data.is_admin) {
+                            $('#ban_user').html('Ban User');
+                            $('#kick_user').html('Kick User');
                         //     // refresh_admin(data.room_name);
-                        // }
+                        }
                         if (has_pass && !data.is_admin) {
                             // let pass_value = false;
                             console.log("Yes, there's a password in room: " + data.room_name);
@@ -1005,6 +968,7 @@
 
         $('#ban_user').click(function() {
             let other_user = $('#receiver').text();
+            let room_name = $('#curr_room').text();
             console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
             socketio.emit("ban_user", {
                 user: username,
@@ -1018,6 +982,7 @@
         });
         $('#kick_user').click(function() {
             let other_user = $('#receiver').text();
+            let room_name = $('#curr_room').text();
             console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
             socketio.emit("ban_user", {
                 user: username,
@@ -1038,6 +1003,7 @@
             $('#incorrect_pass').hide();
             $('#username_taken').hide();
             $('#invalid_roomname').hide();
+            $('#banned').hide();
         });
     </script>
 </body>
