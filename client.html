@@ -595,23 +595,27 @@
 
         // Listener for when we are logging into our chat room
         $("#login_btn").click(function() {
-
+            if ($("#user").val() == "")
+                return;
             //Emit get users to our server
             socketio.emit("get_users");
             //On get users, we check id the user is in the array already
             //If not, we allow the user to login
             socketio.once("get_users", function(info) {
-                users = info[$('#curr_room').text()].users;
-
-                let login = !users.includes($("#user").val());
-                login = $("#user").val() == "" ? false : login;
-
+                let login = true;
+                for (let i = 0; i < Object.keys(info).length; i++) {
+                    this_room = Object.keys(info)[i];
+                    console.log(this_room)
+                    if (info[this_room].users.includes($("#user").val())) {
+                        login = false;
+                        break;
+                    }
+                }
                 if (login) {
-
                     //This joins the user to the main room
                     socketio.emit("join_server", {
                         user: $("#user").val(),
-                        room: $('#curr_room').text()
+                        room: 'Main Room'
                     });
                     $(".login").hide();
                     $(".username").attr('id', )
