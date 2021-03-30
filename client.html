@@ -373,7 +373,7 @@
             <!-- <button id='join_button' name='user_type' value='user'> Join Chat </button> -->
             <p class="btn" id="login_btn"> &#x279C; </p>
 
-
+            <div id = 'username_taken'>Username Taken/Invalid User</div>
         </div>
 
 
@@ -646,7 +646,8 @@
                     loginUser($("#user").val());
                     $("#user").val("");
                 } else {
-                    // console.log("Cannot login " + $("#user").val());
+                    $('#username_taken').show();
+                    $('#username_taken').fadeOut(1000);
                 }
             });
         })
@@ -832,6 +833,10 @@
                         console.log("Room name taken");
                     }
                 });
+            }
+            else{
+                $('#invalid_roomname').show();
+                $('#invalid_roomname').fadeOut(1000);
             }
         });
 
@@ -1032,6 +1037,8 @@
 
         $(document).ready(function() {
             $('#incorrect_pass').hide();
+            $('#username_taken').hide();
+            $('#invalid_roomname').hide();
         });
     </script>
 </body>
