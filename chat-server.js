@@ -32,7 +32,7 @@ const io = socketio.listen(server);
 
 let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, explicit: false, typing: [] } };
 let ids = {};
-let explicit_users = {};
+
 let profanity = ["asshole", "bitch", "bloody", "bollocks", "bugger", "bullshit", "pussy", "cock", "cunt", "dick", "fuck", "motherfucker", "shit"];
 
 // "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
@@ -48,7 +48,8 @@ io.sockets.on("connection", function(socket) {
         socket.this_user = data.user;
         socket.curr_room = data.room;
         info[data.room].users.push(data.user);
-        console.log("So you want explicit to be " + data.explicit);
+
+
 
 
 
@@ -109,6 +110,7 @@ io.sockets.on("connection", function(socket) {
             return;
         }
 
+        socket.join(data.room_name);
 
         let us = data.user;
         if (!info[data.room_name].admin && data.room_name != "Main Room") {
@@ -207,7 +209,7 @@ io.sockets.on("connection", function(socket) {
         // console.log("message: " + data["message"]); // log it to the Node.JS output
         // console.log(data.user);
         console.log("The room you are in is explicit: " + info[room].explicit)
-        if (info[room] && !info[room].explicit) {
+        if (!info[room].explicit) {
             // do stuff to m
             for (let i = 0; i < profanity.length; i++) {
                 let prof = profanity[i];
