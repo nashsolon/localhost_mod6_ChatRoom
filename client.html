@@ -361,10 +361,10 @@
             <!-- <button id='join_button' name='user_type' value='user'> Join Chat </button> -->
             <p class="btn" id="login_btn"> &#x279C; </p>
 
-            
+
         </div>
 
-        
+
 
     </div>
 
@@ -391,8 +391,8 @@
         <input type="text" id="room_pass" placeholder='Password (optional)' />
         <p class='btn' id='create_room'>&#x279C;</p> <br>
 
-        <label> Explicit Content On </label><input type = 'radio' name = 'explicit' value = 'exp_on'> <br>
-        <label> Explicit Content Off </label><input type = 'radio' name = 'explicit' value = 'exp_off'>
+        <label> Explicit Content On </label><input type='radio' name='explicit' value='exp_on'> <br>
+        <label> Explicit Content Off </label><input type='radio' name='explicit' value='exp_off'>
     </div>
     <div id='pass_popup'>
         <div class="panel-header">
@@ -611,8 +611,8 @@
 
         // LOGIN
         $("#login_btn").click(function() {
-            
-            
+
+
             socketio.emit("get_users");
             socketio.on("get_users", function(info) {
                 users = info[$('#curr_room').text()].users;
@@ -789,19 +789,18 @@
 
         $("#create_room").click(function() {
             let explicit = $('input[name="explicit"]:checked').val();
-            if (explicit == null){
+            if (explicit == null) {
                 return;
             }
             console.log("So you want your room to be " + explicit);
-            if (explicit == 'exp_on'){
+            if (explicit == 'exp_on') {
                 explicit = true;
-            }
-            else{
+            } else {
                 explicit = false;
             }
             let room_name = $('#new_room_name').val();
             // let explicit = $('#room_explicit').checked();
-            
+
             if (room_name != "") {
 
                 let old_room = $('#curr_room').text();
@@ -995,7 +994,7 @@
                     duration: -1
                 });
 
-                
+
             });
             $('#kick_user').click(function() {
                 let other_user = $('#receiver').text();
@@ -1009,15 +1008,11 @@
                 });
             });
         }
-        
-        socketio.on("ban_user", function(data){
+
+        socketio.on("ban_user", function(data) {
             console.log("Got to client side of banning user");
             switchRoom(data.banned_room, "Main Room");
         });
-
-        
-
-
     </script>
 </body>
 

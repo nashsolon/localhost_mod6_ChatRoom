@@ -30,7 +30,7 @@ const io = socketio.listen(server);
 //Server side creating a new room
 
 
-let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, typing: [] } };
+let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, explicit: false, typing: [] } };
 let ids = {};
 let explicit_users = {};
 let profanity = ["asshole", "bitch", "bloody", "bollocks", "bugger", "bullshit", "pussy", "cock", "cunt", "dick", "fuck", "motherfucker", "shit"];
@@ -49,9 +49,9 @@ io.sockets.on("connection", function(socket) {
         socket.curr_room = data.room;
         info[data.room].users.push(data.user);
         console.log("So you want explicit to be " + data.explicit);
-        
 
-        
+
+
         ids[data.user] = socket.id;
         console.log(ids);
         io.sockets.emit("get_users", info);
@@ -84,11 +84,7 @@ io.sockets.on("connection", function(socket) {
 
     socket.on('create', function(data) {
         // data.room_name = String(data.room_name);
-        info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, typing: [], explicit: false};
-
-        if (data.explicit == true){
-            info[data.room_name].explicit == true;
-        }
+        info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, typing: [], explicit: data.explicit };
 
         if (data.password != "") {
             // users[data.room_name].push("");
@@ -113,7 +109,7 @@ io.sockets.on("connection", function(socket) {
             return;
         }
 
-       
+
         let us = data.user;
         if (!info[data.room_name].admin && data.room_name != "Main Room") {
             info[data.room_name].admin = us;
@@ -250,7 +246,7 @@ io.sockets.on("connection", function(socket) {
         banned_user_id.push(ids[banned_user]); //Why does ids.banned_user not work in this instance???
         console.log("The user you want to ban has username of " + data.other_user + " and ID of " + banned_user_id);
         console.log(banned_user_id);
-        io.in(banned_user_id).emit("ban_user", {banned_room: data.room});
+        io.in(banned_user_id).emit("ban_user", { banned_room: data.room });
     });
 
     socket.on("isBanned", function(data) {
