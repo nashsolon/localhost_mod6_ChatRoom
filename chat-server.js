@@ -32,6 +32,7 @@ const io = socketio.listen(server);
 
 let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, typing: [] } };
 let ids = {};
+let explicit_users = {};
 let profanity = ["asshole", "bitch", "bloody", "bollocks", "bugger", "bullshit", "pussy", "cock", "cunt", "dick", "fuck", "motherfucker", "shit"];
 
 // "Main Room": ["sasha", "max"], "Stupid Room": ["nash"];
@@ -47,6 +48,10 @@ io.sockets.on("connection", function(socket) {
         socket.this_user = data.user;
         socket.curr_room = data.room;
         info[data.room].users.push(data.user);
+        console.log("So you want explicit to be " + data.explicit);
+        
+
+        
         ids[data.user] = socket.id;
         console.log(ids);
         io.sockets.emit("get_users", info);
@@ -79,7 +84,11 @@ io.sockets.on("connection", function(socket) {
 
     socket.on('create', function(data) {
         // data.room_name = String(data.room_name);
-        info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, typing: [] };
+        info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, typing: [], explicit: false};
+
+        if (data.explicit == true){
+            info[data.room_name].explicit == true;
+        }
 
         if (data.password != "") {
             // users[data.room_name].push("");
@@ -104,7 +113,7 @@ io.sockets.on("connection", function(socket) {
             return;
         }
 
-        socket.join(data["room_name"]);
+       
         let us = data.user;
         if (!info[data.room_name].admin && data.room_name != "Main Room") {
             info[data.room_name].admin = us;
@@ -201,6 +210,7 @@ io.sockets.on("connection", function(socket) {
 
         // console.log("message: " + data["message"]); // log it to the Node.JS output
         // console.log(data.user);
+        console.log("The room you are in is explicit: " + info[room].explicit)
         if (info[room] && !info[room].explicit) {
             // do stuff to m
             for (let i = 0; i < profanity.length; i++) {
