@@ -196,6 +196,10 @@
             padding-left: 20px;
         }
         
+        input[type="checkbox"] {
+            border-style: none;
+        }
+        
         input[type="text"]:focus {
             outline: none;
             /* height: 2px; */
@@ -349,6 +353,10 @@
         .private_msgs {
             text-align: left;
         }
+        
+        #explicit_label {
+            font-size: 15pt;
+        }
     </style>
 
 </head>
@@ -391,8 +399,10 @@
         <input type="text" id="room_pass" placeholder='Password (optional)' />
         <p class='btn' id='create_room'>&#x279C;</p> <br>
 
-        <label> Explicit Content On </label><input type='radio' name='explicit' value='exp_on'> <br>
-        <label> Explicit Content Off </label><input type='radio' name='explicit' value='exp_off'>
+        <!-- <label> Explicit Content On </label><input type='radio' name='explicit' value='exp_on'> <br>
+        <label> Explicit Content Off </label><input type='radio' name='explicit' value='exp_off'> -->
+        <br>
+        <label id='explicit_label'> Explicit </label><input type='checkbox' id='explicit_on' />
     </div>
     <div id='pass_popup'>
         <div class="panel-header">
@@ -790,16 +800,17 @@
         // })
 
         $("#create_room").click(function() {
-            let explicit = $('input[name="explicit"]:checked').val();
-            if (explicit == null) {
-                return;
-            }
-            console.log("So you want your room to be " + explicit);
-            if (explicit == 'exp_on') {
-                explicit_val = true;
-            } else {
-                explicit_val = false;
-            }
+            // let explicit = $('input[name="explicit"]:checked').val();
+            let explicit = $("#explicit_on:checked").length > 0;
+            // if (explicit == null) {
+            //     return;
+            // }
+            console.log("Room explicit: " + explicit);
+            // if (explicit == 'exp_on') {
+            //     explicit_val = true;
+            // } else {
+            //     explicit_val = false;
+            // }
             let room_name = $('#new_room_name').val();
             // let explicit = $('#room_explicit').checked();
 
@@ -818,7 +829,7 @@
                         socketio.emit('create', {
                             room_name: String(room_name),
                             password: $('#room_pass').val(),
-                            explicit: explicit_val,
+                            explicit: explicit,
                             user: username
                         });
                         $("#close_creation").click();
@@ -835,7 +846,9 @@
 
 
                 // This is the part where we append the user that we are private messaging to the header
-                console.log("Private message this user");
+                if ($(this).text() == username)
+                    return;
+                // console.log("Private message this user");
                 $("#private_popup").animate({
                     right: "0"
                 }, 300);
@@ -847,11 +860,21 @@
 
         $('#send_private').click(function() {
             //If we want to send a private message, we send info to the server
+            let receiver = $('#receiver').text();
+            let msg = $('#private_message').val();
+            $('#private_message').val("");
             socketio.emit("private_message", {
                 sender: username,
-                receiver: $('#receiver').text(),
-                private_message: $('#private_message').val()
+                receiver: receiver,
+                private_message: msg
             });
+
+        });
+        $("#private_message").keyup(function(event) {
+            if (event.keyCode === 13) {
+                // console.log("uh what");
+                $("#send_private").click();
+            }
         });
 
         //Server sends back emit to only our sender and our receiver
