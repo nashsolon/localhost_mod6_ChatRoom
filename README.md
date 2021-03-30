@@ -6,9 +6,8 @@ Name: Nash Solon, ID: 477477, Username: nashsolon
 link: 
 
 ## Overview
-If you download our files and then run on port 3456, you should be able to access our chat room  by typing in `node chat-server.js` and then continuing to the port on the web browser. We have added a gitignore file to ignore the node_modules directory.
+Note: If you download our files and then run on port 3456, you should be able to access our chat room  by typing in `node chat-server.js` and then continuing to the port on the web browser. We have added a gitignore file to ignore the node_modules directory.
 
-Details
 - To login to our chat room. Provide yourself with a username and then click on the arrow to advance to the main room.
 - All available rooms will be listed under the header Rooms
 - To add a room, click on the plus sign in the top left hand corner of the room panel
