@@ -405,6 +405,8 @@
 
         <p class='btn' id='send_attempt'>&#x279C;</p> <br>
 
+        <div id = 'incorrect_pass'>Incorrect Password</div> 
+
     </div>
     <div class="right-panel">
         <div class="panel-header">
@@ -794,10 +796,10 @@
             }
             console.log("So you want your room to be " + explicit);
             if (explicit == 'exp_on'){
-                explicit = true;
+                explicit_val = true;
             }
             else{
-                explicit = false;
+                explicit_val = false;
             }
             let room_name = $('#new_room_name').val();
             // let explicit = $('#room_explicit').checked();
@@ -817,7 +819,7 @@
                         socketio.emit('create', {
                             room_name: String(room_name),
                             password: $('#room_pass').val(),
-                            explicit: explicit,
+                            explicit: explicit_val,
                             user: username
                         });
                         $("#close_creation").click();
@@ -916,6 +918,8 @@
                     next_room = "";
                 } else {
                     console.log("Wrong Password");
+                    $('#incorrect_pass').show();
+                    $('#incorrect_pass').fadeOut(1000);
                 }
             });
         });
@@ -1015,6 +1019,9 @@
             switchRoom(data.banned_room, "Main Room");
         });
 
+        $(document).ready(function(){
+            $('#incorrect_pass').hide();
+        });
         
 
 
