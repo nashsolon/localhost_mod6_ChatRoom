@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang = 'en'>
+<html lang='en'>
 
 <head>
     <title> Nash/Sasha Chat Room </title>
@@ -139,7 +139,6 @@
             text-align: left;
             padding: 20px;
             -ms-overflow-style: none;
-            
         }
         
          ::-webkit-scrollbar {
@@ -761,7 +760,7 @@
                 else if (pass)
                     $('#room_list').append("<li class='room_name pass' >" + escapehtml(this_room) + "</li>");
                 else
-                    $('#room_list').append("<li class='room_name' >" + escapehtml(this_room)+ "</li>");
+                    $('#room_list').append("<li class='room_name' >" + escapehtml(this_room) + "</li>");
                 refresh();
             }
         });
@@ -1010,6 +1009,7 @@
                 timestamp: new Date().getTime(),
                 duration: -1
             });
+            $("#close_private").click();
         });
         //Here is where we kick the user for a temporary amount of time
         $('#kick_user').click(function() {
@@ -1026,6 +1026,7 @@
                 timestamp: new Date().getTime(),
                 duration: duration
             });
+            $("#close_private").click();
         });
 
 
