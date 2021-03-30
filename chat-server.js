@@ -19,9 +19,7 @@ const server = http.createServer(function(req, res) {
 server.listen(port);
 
 // Import Socket.IO and pass our HTTP server object to it.
-const socketio = require("socket.io")(server, {
-
-});
+const socketio = require("socket.io")(server, {});
 
 // Attach our Socket.IO server to our HTTP server to listen
 const io = socketio.listen(server);
@@ -41,30 +39,23 @@ let profanity = ["asshole", "bitch", "bloody", "bollocks", "bugger", "bullshit",
 // This will run when a new user connects to the server
 io.sockets.on("connection", function(socket) {
 
-    // This will run if a user successfully logs into the server
+    // This will run if a user successfully logs into the server and put them into "Main Room"
     socket.on('join_server', function(data) {
         socket.join(data.room);
         console.log(data.user + " connected");
         socket.this_user = data.user;
         socket.curr_room = data.room;
         info[data.room].users.push(data.user);
-
-
-
-
-
         ids[data.user] = socket.id;
         console.log(ids);
         io.sockets.emit("get_users", info);
     });
 
+    // This will run if the user disconnects, taking them out of 'info' entirely
     socket.on("disconnect", function() {
         if (socket.this_user) {
-            // let index = users[socket.curr_room].indexOf(socket.this_user);
             console.log("Users before:");
             console.log(info);
-            // console.log("Remove at index " + index);
-            // users[socket.curr_room] = users[socket.curr_room].splice(index, 1);
             if (info[socket.curr_room]) {
                 info[socket.curr_room].users = info[socket.curr_room].users.filter(item => item !== socket.this_user)
             }
@@ -79,50 +70,43 @@ io.sockets.on("connection", function(socket) {
 
     })
 
+    // This allows the client-side code to reference the 'info' object containing all users
     socket.on('get_users', function() {
         io.sockets.emit("get_users", info);
     });
 
+    // This creates a room, adding it to 'info' and setting the password if applicable.
+    // It also adds the user who creates it to the room, and this user will be set as the
+    // admin in the next function
     socket.on('create', function(data) {
-        // data.room_name = String(data.room_name);
         info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, typing: [], explicit: data.explicit };
 
         if (data.password != "") {
-            // users[data.room_name].push("");
             info[data.room_name].password = data.password;
         }
         socket.join(data.room_name);
 
-
-        // console.log("The room you joined is: " + data["room_name"]);
-        // io.sockets.emit("add_to_roomlist", data);
         io.sockets.emit("get_users", info)
     });
 
+    // This will switch a user to another room
     socket.on('switch_room', function(data) {
-        // This callback runs when the server receives a new message from the client.
-
-        // console.log("message: " + data["message"]); // log it to the Node.JS output
-        // if (data.pass_value == false) {
+        // This will only print if the data was sent improperly
         if (!data.old_room || !data.room_name) {
-            console.log("Bad\n-----");
             console.log(data);
             return;
         }
 
+        // This adds the user to the room so that they can only see/send messages in the correct room
         socket.join(data.room_name);
 
+        // If there's no admin, then the current room is either the "Main Room" or the user just created
+        // the room; if this is the case, we set the admin to the current user
         let us = data.user;
         if (!info[data.room_name].admin && data.room_name != "Main Room") {
             info[data.room_name].admin = us;
         }
-        if (us == info[data.room_name].admin) {
-            console.log("You are the admin in the room " + data.room_name);
-            socket.emit("admin", info);
-        }
-        // admin = users[data.room_name]
         io.sockets.emit("get_users", info);
-
 
         console.log(us + " is leaving " + data.old_room + " and joining " + data.room_name);
         info[data.old_room].users = info[data.old_room].users.filter(item => item !== us);
@@ -131,21 +115,11 @@ io.sockets.on("connection", function(socket) {
             info[data.room_name].users.push(us);
             socket.curr_room = data.room_name;
         }
-        // } else {
-        //     password = users[data.room_name][1];
-        //     console.log("The password is " + password);
-        //     socket.emit('enter_password', {
-        //         password: password,
-
-        //     });
-        // }
-        // // console.log("The room you joined is: " + data["room_name"]);
-        console.log(info);
         io.sockets.emit("get_users", info);
     });
 
-    // typing = "";
-
+    // This will run if a user is typing, and will add that user to the typing array within the 
+    // current room sub-object
     socket.on('typing', function(data) {
         let room = data.room;
         let user = data.user;
@@ -157,32 +131,31 @@ io.sockets.on("connection", function(socket) {
         }
     });
 
+    // This will run if a user stops typing, and will remove that user from the typing array within
+    // the current room sub-object
     socket.on('typing_off', function(data) {
-        // if (username == typing) {
-        //     typing = "";
         let room = data.room;
         info[room].typing = info[room].typing.filter(item => item !== data.user);
 
         io.in(room).emit('typing_off', info[room].typing);
         console.log(data.user + "'s no longer typing");
         console.log(info[room].typing);
-        // }
     });
 
+    // This will run if a user sends a private message to another user
     socket.on('private_message', function(data) {
         console.log(data);
         id_receiver = ids[data.receiver];
         id_sender = ids[data.sender];
         private_ids = [id_receiver, id_sender];
-        //console.log("the id of the receiver is " + id_receiver);
         io.in(private_ids).emit("p_message", data);
 
         console.log("the id of the receiver is " + id_receiver);
     });
+
+    // This will run if the user attempts to get into a password-protected room,
+    // and will send back 'true' or 'false' in the 'correct' field
     socket.on("pass_attempt", function(data) {
-        // .pass, .room
-        // console.log("Pass: " + data.pass + ", Room: " + data.room);
-        // console.log("Pass is " + data.pass);
         console.log(data);
         if (info[data.next_room] && info[data.next_room].password) {
             let real_pass = info[data.next_room].password;
@@ -192,67 +165,51 @@ io.sockets.on("connection", function(socket) {
         }
     });
 
+    // This will simply return the list of room names
     socket.on("get_rooms", function() {
         let all_rooms = Object.keys(info);
         socket.emit("get_rooms", all_rooms);
     })
 
 
-    // This callback runs when a new Socket.IO connection is established.
-
+    // This will run whenever a message is sent from a user
     socket.on('message_to_server', function(data) {
         console.log(data);
         let m = data.message;
         let room = data.room;
-        // This callback runs when the server receives a new message from the client.
 
-        // console.log("message: " + data["message"]); // log it to the Node.JS output
-        // console.log(data.user);
-        console.log("The room you are in is explicit: " + info[room].explicit)
+        // Here we check if the room is non-explicit and, if so, we filter out explicit language
         if (!info[room].explicit) {
-            // do stuff to m
             for (let i = 0; i < profanity.length; i++) {
                 let prof = profanity[i];
                 if (m.includes(prof)) {
-                    console.log("Includes " + prof);
                     m = m.replace(prof, prof.substring(0, 1) + "-".repeat(prof.length - 1));
-                    // m = m.replace(prof, "");
                 }
             }
-            console.log(data);
-            console.log(m);
             data.message = m;
-            console.log(data);
         }
-        // This callback runs when the server receives a new message from the client.
 
-        // console.log("message: " + data["message"]); // log it to the Node.JS output
-        // console.log(data.user);
-
-        io.in(room).emit("message_to_client", data); // broadcast the message to other users
+        // Now we'll send the message back to the client, edited if necessary
+        io.in(room).emit("message_to_client", data);
     });
 
+    // This function is to determine if the current user is the admin of the room they're in
     socket.on("isAdmin", function(data) {
-        console.log("Is " + data.user + " the admin???????");
         let thing = data.user == info[data.room].admin;
-        // console.log(thing + ": He is " + data.user + ", admin is " + info[data.room].admin);
         socket.emit("isAdmin", { room_name: data.room, is_admin: thing, info: info[data.room] });
     });
 
-    // Stanley's: {banned_users: {nash: ["12-14-21 3-28"], [-1]}}
+    // This function will ban a user from a room
     socket.on("ban_user", function(data) {
         info[data.room].banned_users[data.other_user] = [data.timestamp, data.duration];
-        //console.log(info[data.room]);
         banned_user = data.other_user;
         banned_user_id = []
-        banned_user_id.push(ids[banned_user]); //Why does ids.banned_user not work in this instance???
-        console.log("The user you want to ban has username of " + data.other_user + " and ID of " + banned_user_id);
-        console.log(banned_user_id);
+        banned_user_id.push(ids[banned_user]);
         io.in(banned_user_id).emit("ban_user", { banned_room: data.room });
     });
 
+    // This will check if a user is banned from a room
     socket.on("isBanned", function(data) {
-        // data.user, data.room
         let banned = false;
         if (data.user in info[data.room].banned_users) {
             let curr_time = new Date().getTime();
@@ -274,5 +231,4 @@ io.sockets.on("connection", function(socket) {
         }
         socket.emit("isBanned", { banned: banned })
     });
-
 });

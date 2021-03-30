@@ -359,7 +359,26 @@
             font-size: 15pt;
         }
         
-        #incorrect_pass {
+        #incorrect_pass,
+        #banned {
+            font-size: 15pt;
+        }
+        
+        #kick_duration {
+            border-style: none;
+            outline: none;
+            font-family: 'Quicksand';
+            font-size: 15pt;
+            background-color: var(--right-panel-hd);
+            color: white;
+        }
+        
+        #receiver {
+            font-size: 16pt;
+        }
+        
+        #ban_user,
+        #kick_user {
             font-size: 15pt;
         }
     </style>
@@ -376,8 +395,6 @@
             <div id='username_taken'>Username Taken/Invalid User</div>
         </div>
 
-
-
     </div>
 
     <div class="left-panel">
@@ -388,7 +405,6 @@
 
             <p>Rooms</p>
             <ul id='room_list'>
-                <!-- <li class='room_name curr'>Main Room</li> -->
             </ul>
 
             <div id='banned'>Permission Denied</div>
@@ -448,10 +464,9 @@
     <div class="room-users">
         <div class="panel-header">
             <p>Users</p>
-            <p class="btn" id="close_users"> > </p>
+            <p class="btn" id="close_users"> &gt; </p>
         </div>
         <ul id='user_list'>
-            <!-- <li class='user_name'>Sasha</li> -->
         </ul>
 
 
@@ -460,8 +475,7 @@
     <div id='private_popup'>
         <div class="panel-header">
             <p id='private_header'>Private Message</p>
-            <p class="btn" id="close_private">
-                > </p>
+            <p class="btn" id="close_private"> &gt; </p>
         </div>
 
         <input type="text" id="private_message" placeholder='Enter Message' />
@@ -473,10 +487,18 @@
             </div>
         </div>
 
-        <!-- Only show whne we are the admin -->
+        <!-- Only show when we are the admin -->
         <div id='admin_powers'>
-            <p class='btn' id="ban_user"></p>
-            <p class='btn' id="kick_user"></p>
+            <p class='btn' id="ban_user">Ban User</p>
+            <p class='btn' id="kick_user">Kick Users (temporary)</p>
+            <select id='kick_duration'>
+                <option class='kick_ops' value='10000'>10 seconds</option>
+                <option class='kick_ops' value='30000'>30 seconds</option>
+                <option class='kick_ops' value='60000'>1 minutes</option>
+                <option class='kick_ops' value='600000'>10 minutes</option>
+                <option class='kick_ops' value='1800000'>30 minutes</option>
+                <option class='kick_ops' value='3600000'>1 hour</option>
+            </select>
         </div>
 
 
@@ -591,9 +613,6 @@
         socketio.on("typing_off", function(typing_users) {
             checkTyping(typing_users);
         });
-        // TYPING: check here instead (not on server side), user gets all typing msgs but doesn't show 
-        // if there's one already right? that sounds ez
-
 
         // Listener for when we are logging into our chat room
         $("#login_btn").click(function() {
@@ -607,7 +626,6 @@
                 let login = true;
                 for (let i = 0; i < Object.keys(info).length; i++) {
                     this_room = Object.keys(info)[i];
-                    console.log(this_room)
                     if (info[this_room].users.includes($("#user").val())) {
                         login = false;
                         break;
@@ -758,12 +776,10 @@
 
             //No empty roomname
             if (room_name != "") {
-
-
                 let old_room = $('#curr_room').text();
                 //Creator of the room is admin. So they can see ban and kick user
-                $('#ban_user').html('Ban User');
-                $('#kick_user').html('Kick User');
+                // $('#ban_user').show();
+                // $('#kick_user').show();
 
 
                 socketio.emit("get_rooms");
@@ -919,11 +935,10 @@
         function refresh() {
             $(".room_name").off("click");
             $('.room_name').click(function() {
-                
+
 
                 let old_room = $('#curr_room').text();
                 let room_name = $(this).text();
-                console.log("WE JUST CLICKED ON " + room_name);
                 //If we click on the same roomname, we do nothing
                 if (old_room == room_name) {
                     return;
@@ -943,36 +958,34 @@
                         return;
                     }
 
-                    //If the user is the admin, then they are granted admin powers through Ban User and Kick User
+                    // If the user is the admin, then they are granted admin powers through Ban User and Kick User
                     socketio.emit("isAdmin", {
                         user: username,
                         room: next_room
                     });
                     socketio.once("isAdmin", function(data) {
                         console.log(username + " is the admin? " + data.is_admin);
-                        
+
 
                         let has_pass = data.info.password;
-                       
+
                         //If we are the admin, we cann see ban and kick users
-                         if (data.is_admin) {
-                            $('#ban_user').html('Ban User');
-                            $('#kick_user').html('Kick User');
-                        
+                        if (data.is_admin)
+                            $('#admin_powers').show();
+                        else {
+                            $('#admin_powers').hide();
                         }
                         //If our user is not the admin, and the room has a password, then we animate password popup
                         // and the user has to input the password
                         if (has_pass && !data.is_admin) {
-                            
+
                             console.log("Yes, there's a password in room: " + data.room_name);
-                            
+
                             $("#pass_popup").animate({
                                 left: "0"
                             }, 300);
-                        //If the user is the admin or there is not password, then we just switch the user to the room
+                            //If the user is the admin or there is not password, then we just switch the user to the room
                         } else {
-                            
-                            // console.log("WHATOIJAE: OIJE:OGI JEWOG JQI#OGN")
                             switchRoom(old_room, room_name);
                         }
                     });
@@ -997,14 +1010,13 @@
                 timestamp: new Date().getTime(),
                 duration: -1
             });
-
-
         });
         //Here is where we kick the user for a temporary amount of time
         $('#kick_user').click(function() {
             let other_user = $('#receiver').text();
             let room_name = $('#curr_room').text();
-            
+            let duration = $('#kick_duration').val();
+
             console.log('You are the admin and the other user you want to ban is ' + other_user + ' from the room ' + room_name);
             //We then emit the information, which includes a time stamp and the duration which is 10,000 ms or 10 seconds
             socketio.emit("ban_user", {
@@ -1012,7 +1024,7 @@
                 room: room_name,
                 other_user: other_user,
                 timestamp: new Date().getTime(),
-                duration: 10000
+                duration: duration
             });
         });
 
