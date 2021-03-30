@@ -370,7 +370,6 @@
         <div class="login_cont">
             <p>Enter Username:</p>
             <input type='text' id='user' placeholder='Username' />
-            <!-- <button id='join_button' name='user_type' value='user'> Join Chat </button> -->
             <p class="btn" id="login_btn"> &#x279C; </p>
 
             <div id='username_taken'>Username Taken/Invalid User</div>
@@ -391,7 +390,7 @@
                 <!-- <li class='room_name curr'>Main Room</li> -->
             </ul>
 
-            <div id = 'banned'>Permission Denied</div>
+            <div id='banned'>Permission Denied</div>
         </div>
     </div>
     <div id='create_popup'>
@@ -405,8 +404,6 @@
         <input type="text" id="room_pass" placeholder='Password (optional)' />
         <p class='btn' id='create_room'>&#x279C;</p> <br>
 
-        <!-- <label> Explicit Content On </label><input type='radio' name='explicit' value='exp_on'> <br>
-        <label> Explicit Content Off </label><input type='radio' name='explicit' value='exp_off'> -->
         <br>
         <label id='explicit_label'> Explicit </label><input type='checkbox' id='explicit_on' />
     </div>
@@ -495,23 +492,23 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
-  
+
         //Function to switch rooms. We call this function in multiple places throughout our client side
         function switchRoom(old_room, room_name) {
 
             //Get the current room we are in and also empty the chat log for the user
             $('#curr_room').text(room_name);
             $(".chat .msgs").empty();
-            
+
             //Emit to our server side so that we can switch rooms
             socketio.emit('switch_room', {
                 user: username,
                 old_room: old_room,
                 room_name: room_name
-       
+
             });
 
-   
+
 
         }
 
@@ -605,12 +602,12 @@
             //If not, we allow the user to login
             socketio.once("get_users", function(info) {
                 users = info[$('#curr_room').text()].users;
-               
+
                 let login = !users.includes($("#user").val());
                 login = $("#user").val() == "" ? false : login;
-                
+
                 if (login) {
-                    
+
                     //This joins the user to the main room
                     socketio.emit("join_server", {
                         user: $("#user").val(),
@@ -707,7 +704,7 @@
             $("#user_list").empty();
             let these_users = info[$('#curr_room').text()].users;
             let admin = info[$('#curr_room').text()].admin;
-            
+
             //Cases for when a user is themselves or an admin
             if (admin == username)
                 $("#user_list").append("<li class='user_name me'>" + username + " (admin)</li>");
@@ -743,7 +740,7 @@
             }
         });
 
-       
+
         //Allows a user to create a room but clicking on add button in top left hand side
         $("#create_room").click(function() {
             //Part of creative, checks if user wants explicit content or not
@@ -759,7 +756,7 @@
                 //Creator of the room is admin. So they can see ban and kick user
                 $('#ban_user').html('Ban User');
                 $('#kick_user').html('Kick User');
-                
+
 
                 socketio.emit("get_rooms");
                 socketio.once("get_rooms", function(all_rooms) {
@@ -885,7 +882,7 @@
             });
             //Once the server determines whether or not our password is correct...
             socketio.once("pass_attempt", function(data) {
-                
+
                 //Either correct and we switch to that room...
                 if (data.correct) {
                     console.log("Correct Password")
@@ -895,8 +892,8 @@
                     }, 300)
                     switchRoom(old_room, data.next_room);
                     next_room = "";
-                    
-                //Or the password is wrong and we fade in the incorrect pass
+
+                    //Or the password is wrong and we fade in the incorrect pass
                 } else {
                     console.log("Wrong Password");
                     $('#incorrect_pass').show();
@@ -940,10 +937,10 @@
                         // console.log("Has a password? " + $(this).hasClass("pass"));
                         let has_pass = data.info.password;
                         // console.log(room_name)
-                         if (data.is_admin) {
+                        if (data.is_admin) {
                             $('#ban_user').html('Ban User');
                             $('#kick_user').html('Kick User');
-                        //     // refresh_admin(data.room_name);
+                            //     // refresh_admin(data.room_name);
                         }
                         if (has_pass && !data.is_admin) {
                             // let pass_value = false;
