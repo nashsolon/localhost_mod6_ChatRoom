@@ -16,9 +16,6 @@ const server = http.createServer(function(req, res) {
         res.end(data);
     });
 });
-server.listen(port, () => {
-    server.emit('start', null);
-});
 
 // Import Socket.IO and pass our HTTP server object to it.
 const socketio = require("socket.io")(server, {});
