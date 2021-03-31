@@ -1,16 +1,16 @@
 {
-  "name": "group",
-  "version": "1.0.0",
-  "description": "Name: Sasha Chackalackal, ID: 475454, Username: sashachack\r Name: Nash Solon, ID: 477477, Username: nashsolon",
-  "main": "chat-server.js",
-  "dependencies": {
-    "mime": "^2.5.2",
-    "socket.io": "^4.0.0"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC"
+    "name": "group",
+    "version": "1.0.0",
+    "description": "",
+    "main": "chat-server.js",
+    "dependencies": {
+        "mime": "^2.5.2",
+        "socket.io": "^4.0.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC"
 }
