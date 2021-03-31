@@ -16,7 +16,9 @@ const server = http.createServer(function(req, res) {
         res.end(data);
     });
 });
-server.listen(port);
+server.listen(port, () => {
+    server.emit('start', null);
+});
 
 // Import Socket.IO and pass our HTTP server object to it.
 const socketio = require("socket.io")(server, {});
@@ -36,9 +38,20 @@ let ids = {};
 // out. These terms were selected from the list of YouTube blacklisted words
 let profanity = ["asshole", "bitch", "bloody", "bollocks", "bugger", "bullshit", "pussy", "cock", "cunt", "dick", "fuck", "motherfucker", "shit"];
 
+// We use this to ensure that the profanity is counted not jsut for lowercase letters
+if (profanity.length < 15) {
+    console.log("here at least");
+    let len = profanity.length;
+    for (let i = 0; i < len; i++) {
+        let this_one = profanity[i];
+        console.log(this_one);
+        profanity.push(this_one.toUpperCase());
+        profanity.push(this_one.charAt(0).toUpperCase() + this_one.substring(1));
+    }
+}
+
 // This will run when a new user connects to the server
 io.sockets.on("connection", function(socket) {
-
     // This will run if a user successfully logs into the server and put them into "Main Room"
     socket.on('join_server', function(data) {
         socket.join(data.room);

@@ -770,16 +770,13 @@
             if (room_name != "") {
                 let old_room = $('#curr_room').text();
                 //Creator of the room is admin. So they can see ban and kick user
-                // $('#ban_user').show();
-                // $('#kick_user').show();
+                $("#admin_powers").show();
 
 
                 socketio.emit("get_rooms");
                 socketio.once("get_rooms", function(all_rooms) {
                     console.log(all_rooms)
                     if (!all_rooms.includes(room_name)) {
-                        // all_rooms;
-                        // let the_pass = $('#room_pass').val();
 
                         socketio.emit('create', {
                             room_name: String(room_name),
@@ -908,6 +905,7 @@
                     $("#pass_popup").animate({
                         left: "-500px"
                     }, 300)
+                    $("#pass_attempt").val("");
                     switchRoom(old_room, data.next_room);
                     next_room = "";
 
@@ -1035,6 +1033,7 @@
             $('#username_taken').hide();
             $('#invalid_roomname').hide();
             $('#banned').hide();
+            $('#admin_powers').hide();
         });
     </script>
 </body>
