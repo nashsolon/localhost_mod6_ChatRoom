@@ -34,7 +34,6 @@ Full parts:
 - Censoring content
     - Upon creating a room, the creator can choose whether or not they want profanity to be censored
     - If the room is censored, we chose a selection of words considered profane by the YouTube banned words list and, if a user were to type one of these words, the word would be censored with dashes. ex. hello => h----
-    - 
 - Temporariliy kick a user from a room for a selected duration of time
     - Here, the admin can kick a user from the room. However, the admin can select a certain amount of time they would like the user to be kicked for.
     - Admin can select from a drop down menu to select how long to kick for.
