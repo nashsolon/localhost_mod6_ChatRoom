@@ -37,7 +37,6 @@ let profanity = ["asshole", "bitch", "bloody", "bollocks", "bugger", "bullshit",
 
 // We use this to ensure that the profanity is counted not jsut for lowercase letters
 if (profanity.length < 15) {
-    console.log("here at least");
     let len = profanity.length;
     for (let i = 0; i < len; i++) {
         let this_one = profanity[i];
