@@ -3,17 +3,10 @@ Name: Sasha Chackalackal, ID: 475454, Username: sashachack
 
 Name: Nash Solon, ID: 477477, Username: nashsolon
 
-link: 
-
-todo: sometimes admins cannot ban, could ban in main room for some reason
-reset password if go to another room
-
-sometimes words don't send?
-
 ## Overview
 Note: If you download our files and then run on port 3456, you should be able to access our chat room  by typing in `node chat-server.js` and then continuing to the port on the web browser. We have added a gitignore file to ignore the node_modules directory.
 
-- To login to our chat room. Provide yourself with a username and then click on the arrow to advance to the main room.
+- To login to our chat room, Enter a username and then click on the arrow to advance to the main room.
 - All available rooms will be listed under the header Rooms
 - To add a room, click on the plus sign in the top left hand corner of the room panel
     - Provide a room name and password if desired, then click on the arrow.
@@ -31,17 +24,17 @@ Standalone parts:
 - Highlighted current room with green text in the rooms list
 - Highlighted current user with green text (both in chat and also in the users list)
 - Admin user denoted by (admin) on the users list
-- Users cannot enter room or username with an already existing name
-- Once the chat room log extends past the page, we implemented an automatric scrolling feature
+- Users cannot create a room with an existing name, nor can they use a username that is already taken
+- Once the chat room log extends past the page, we implemented an automatic scrolling feature
 
 Full parts:
 - Typing feature
-    - When up to three users are typing, other users can see their uesrnames and that they are typing
-    - When more than three users are typing the other users see the number of users that are typing
+    - When up to three users are typing in a room, other users can see their uesrnames and that they are typing
+    - When more than three users are typing, the other users see the number of users that are typing
 - Censoring content
-    - Upon creating a room, the creator can determine whether or not they want their room to be censored
-    - If the room is censored, we chose a selection of words considered profane by the youtube banned words list and, if a user were to type one of these words, the       word would be censored with dashes. ex hello => h----
+    - Upon creating a room, the creator can choose whether or not they want profanity to be censored
+    - If the room is censored, we chose a selection of words considered profane by the YouTube banned words list and, if a user were to type one of these words, the word would be censored with dashes. ex. hello => h----
     - 
-- Temporariliy kick a user from a room for a select duration of time
+- Temporariliy kick a user from a room for a selected duration of time
     - Here, the admin can kick a user from the room. However, the admin can select a certain amount of time they would like the user to be kicked for.
     - Admin can select from a drop down menu to select how long to kick for.
