@@ -41,7 +41,6 @@ if (profanity.length < 15) {
     let len = profanity.length;
     for (let i = 0; i < len; i++) {
         let this_one = profanity[i];
-        console.log(this_one);
         profanity.push(this_one.toUpperCase());
         profanity.push(this_one.charAt(0).toUpperCase() + this_one.substring(1));
     }
