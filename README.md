@@ -5,6 +5,11 @@ Name: Nash Solon, ID: 477477, Username: nashsolon
 
 link: 
 
+todo: sometimes admins cannot ban, could ban in main room for some reason
+reset password if go to another room
+
+sometimes words don't send?
+
 ## Overview
 Note: If you download our files and then run on port 3456, you should be able to access our chat room  by typing in `node chat-server.js` and then continuing to the port on the web browser. We have added a gitignore file to ignore the node_modules directory.
 
