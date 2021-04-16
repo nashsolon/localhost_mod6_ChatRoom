@@ -37,3 +37,6 @@ Full parts:
 - Temporariliy kick a user from a room for a selected duration of time
     - Here, the admin can kick a user from the room. However, the admin can select a certain amount of time they would like the user to be kicked for.
     - Admin can select from a drop down menu to select how long to kick for.
+
+## Grading
+-0pts no issues
