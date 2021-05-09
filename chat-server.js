@@ -24,10 +24,21 @@ const socketio = require("socket.io")(server, {});
 // Attach our Socket.IO server to our HTTP server to listen
 const io = socketio.listen(server);
 
+// Attach our Socket.IO server to our HTTP server to listen
+// const io = socketio.listen(server);
+
 // The 'info' object stores most of the information about our rooms. It contains a sub-object for each room which contains
 // the password and admin if applicable, the users inside, the banned users, whether or not it is an explicit room, and
 // who in the room is currently typing. We start off with just the "Main Room"
-let info = { "Main Room": { password: null, admin: null, users: [], banned_users: {}, explicit: false, typing: [] } };
+let info = { "Main Room": { 
+                password: null, 
+                admin: null, 
+                users: [], 
+                banned_users: {}, 
+                explicit: false, 
+                typing: [],
+                messages: [{user: null, message: null}] } 
+            };
 
 // The 'ids' object is for private messaging
 let ids = {};
@@ -88,7 +99,13 @@ io.sockets.on("connection", function(socket) {
     // It also adds the user who creates it to the room, and this user will be set as the
     // admin in the next function
     socket.on('create', function(data) {
-        info[data.room_name] = { password: null, admin: null, users: [], banned_users: {}, typing: [], explicit: data.explicit };
+        info[data.room_name] = { password: null, 
+                                admin: null, 
+                                users: [], 
+                                banned_users: {}, 
+                                typing: [], 
+                                explicit: data.explicit,  
+                                messages: [{user: null, message: null}]};
 
         if (data.password != "") {
             info[data.room_name].password = data.password;
@@ -108,6 +125,8 @@ io.sockets.on("connection", function(socket) {
 
         // This adds the user to the room so that they can only see/send messages in the correct room
         socket.join(data.room_name);
+        console.log("You switched into the room with messages " + JSON.stringify(info[data.room_name].messages))
+        io.sockets.emit('get_old_messages', {old_messages : info[data.room_name].messages, user: data.user})
 
         // If there's no admin, then the current room is either the "Main Room" or the user just created
         // the room; if this is the case, we set the admin to the current user
@@ -183,7 +202,7 @@ io.sockets.on("connection", function(socket) {
 
     // This will run whenever a message is sent from a user
     socket.on('message_to_server', function(data) {
-        console.log(data);
+        // console.log(data);
         let m = data.message;
         let room = data.room;
 
@@ -197,6 +216,13 @@ io.sockets.on("connection", function(socket) {
             }
             data.message = m;
         }
+
+        //Insert the message into our messages array
+        const saved_message = {user: data.user, message: data.message}
+        // console.log(saved_message);
+        
+        info[room].messages.push(saved_message)
+        console.log(info[room].messages)
 
         // Now we'll send the message back to the client, edited if necessary
         io.in(room).emit("message_to_client", data);

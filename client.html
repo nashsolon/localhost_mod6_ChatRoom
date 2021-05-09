@@ -217,6 +217,10 @@
             filter: brightness(0.8);
             cursor: pointer;
         }
+
+        .room_name:hover{
+            cursor: pointer;
+        }
         
         .btn:focus {
             filter: brightness(0.6);
@@ -515,6 +519,26 @@
             //Get the current room we are in and also empty the chat log for the user
             $('#curr_room').text(room_name);
             $(".chat .msgs").empty();
+
+            //Printing old messages here
+            socketio.once('get_old_messages', data => {
+                // console.log(data);
+                old_messages = data.old_messages;
+                user = data.user;
+                // console.log(old_messages.length);
+                for(i = 0; i < old_messages.length; i++){
+                    let message_author = old_messages[i].user;
+                    let message = old_messages[i].message;
+                    if(message_author != null){
+                        if (user == message_author)
+                            $(".chat .msgs").append("<p><strong class='me'>" + escapehtml(message_author) + ":</strong> " + escapehtml(message) + "</p>");
+                        else
+                            $(".chat .msgs").append("<p><strong>" + escapehtml(message_author) + ":</strong> " + escapehtml(message) + "</p>");
+                    }
+                    console.log(old_messages[i]);
+                }
+                
+            })
 
             //Emit to our server side so that we can switch rooms
             socketio.emit('switch_room', {

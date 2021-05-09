@@ -1,0 +1,8 @@
+Directions for this project (local hosted)
+
+1. Open in viscose (or just cd into the folder from command line)
+2. Type in `node chat-server.js`
+3. Go to localhost website:
+	http://localhost:3456/
+
+Nice!
