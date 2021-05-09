@@ -5,7 +5,12 @@ Directions for this project (local hosted)
 3. Go to localhost website:
 	http://localhost:3456/
 
-	For others, go to my IP address! (Might have to use ngrok - still checking)
-	172.27.96.139:3456
+	For others on the same network...
+		Go to 172.27.96.139:3456
+	For others not on the same network...
+		Use ngrok...
+			1. Open up one command line, type in `ngrok http <PORT>`
+			2. Open up another command line, start the server at port using
+			   `node chat-server.js`
 
 Nice!
