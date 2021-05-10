@@ -12,5 +12,10 @@ Directions for this project (local hosted)
 			1. Open up one command line, type in `ngrok http <PORT>`
 			2. Open up another command line, start the server at port using
 			   `node chat-server.js`
+			NOTE: ngrok actually has a limit to number of connections so it 			      sucks. Let's try to use local tunnel
+		Use local tunnel...
+			1. Install local tunnel through `npm install -g localtunnel`
+			2. Start server on a local port `lt --port <PORT>`
+			3. Voila
 
 Nice!
