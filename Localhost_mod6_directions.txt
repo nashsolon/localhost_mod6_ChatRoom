@@ -1,8 +1,10 @@
 Directions for this project (local hosted)
 
-1. Open in viscose (or just cd into the folder from command line)
-2. Type in `node chat-server.js`
-3. Go to localhost website:
+1. Clone repository
+2. Open in viscose (or just cd into the folder from command line)
+3. Use `npm install`
+4. Type in `node chat-server.js`
+5. Go to localhost website:
 	http://localhost:3456/
 
 	For others on the same network...
