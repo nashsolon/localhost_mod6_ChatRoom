@@ -4,6 +4,7 @@ Name: Sasha Chackalackal, ID: 475454, Username: sashachack
 Name: Nash Solon, ID: 477477, Username: nashsolon
 
 ## Overview
+Nash Note: rm package-lock.json and then run `npm install` in the root project folder
 Note: If you download our files and then run on port 3456, you should be able to access our chat room  by typing in `node chat-server.js` and then continuing to the port on the web browser. We have added a gitignore file to ignore the node_modules directory.
 
 - To login to our chat room, Enter a username and then click on the arrow to advance to the main room.
